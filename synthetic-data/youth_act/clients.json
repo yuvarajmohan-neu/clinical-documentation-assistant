@@ -1,0 +1,16 @@
+[
+  {
+    "external_id": "YACT-C001",
+    "name": "Avery Thompson (synthetic)",
+    "dob": "2010-05-19",
+    "diagnosis_summary": "Disruptive Mood Dysregulation Disorder (F34.8) — synthetic/role-played case for demo purposes only.",
+    "goals": [
+      {
+        "goal_id": "G1",
+        "description": "Attend school 4 of 5 days per week without disciplinary incident",
+        "target_date": "2027-02-15",
+        "status": "active"
+      }
+    ]
+  }
+]

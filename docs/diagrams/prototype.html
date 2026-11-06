@@ -1,0 +1,233 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css">
+<style>
+.page { position: relative; }
+header h1 { white-space: nowrap; }
+header .sub { max-width: 1000px; }
+.legend { white-space: nowrap; gap: 14px; font-size: 14px; }
+.legend .ln { width: 26px; height: 0; border-top: 3px solid #1e3a5f; display: inline-block; }
+.legend .ln.d { border-top-style: dashed; }
+svg#arrows { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+code { font-family: Consolas, monospace; font-size: 12.5px; background: #f1f5f9; padding: 0 4px; border-radius: 3px; }
+
+.row1 { display: grid; grid-template-columns: 330px 130px 1fr 110px 250px; align-items: stretch; }
+.web .card { margin-bottom: 28px; }
+.web .card:last-child { margin-bottom: 0; }
+.beP { display: flex; flex-direction: column; }
+.be { display: grid; grid-template-columns: 1fr 1fr; gap: 0 120px; }
+.be .col .card { margin-bottom: 30px; }
+.be .col .card:last-child { margin-bottom: 0; }
+.wrapbox { margin-top: auto; border: 2px dashed #1e3a5f; border-radius: 11px; padding: 8px 10px 10px; background: #eef3f9; }
+.wrapbox .lbl { font-size: 13px; font-weight: 700; color: #1e3a5f; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 7px; }
+.wrapbox .lbl span { text-transform: none; letter-spacing: 0; font-weight: 500; color: #475569; }
+.wrapbox .g { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+.wrapbox .card { margin-bottom: 0; }
+.spacer { height: 40px; }
+.ext { display: flex; flex-direction: column; }
+.ext .stack { flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; }
+.ext .panel { text-align: center; }
+.ext .panel h2 { justify-content: center; margin-bottom: 6px; }
+.gap2 { height: 74px; }
+.datarow { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; }
+.datarow .card { margin-bottom: 0; margin-right: 24px; }
+.datarow .card:nth-child(-n+2) { margin-right: 96px; }
+.datarow .card:last-child { margin-right: 0; }
+header .sub { max-width: 1150px; }
+.flow { margin-top: 24px; }
+</style></head><body><div class="page">
+
+<header>
+  <div><h1>Clinical Documentation Assistant · Hackathon Prototype</h1>
+  <div class="sub">What the team builds and demos. Open-source stack, every provider behind a wrapper. Synthetic data only. Clinician approves every note.</div></div>
+  <div class="legend">
+    <span><i class="sw human-bg"></i>Clinician</span>
+    <span><i class="sw ai-bg"></i>Claude (AI)</span>
+    <span><i class="sw rules-bg"></i>Rules</span>
+    <span><i class="sw sec-bg"></i>Security</span>
+    <span><i class="ln"></i>Data flow</span>
+    <span><i class="ln d"></i>Config / loop</span>
+  </div>
+</header>
+
+<div class="row1">
+  <div class="panel web" id="webP">
+    <h2>Web App <small>React · JB brand · 12h ET · 2 pages</small></h2>
+    <div class="card sec" id="w1"><b>Sign in (OIDC)</b><i>Keycloak login · token on every call</i></div>
+    <div class="card human" id="w2"><b>Program &amp; session picker</b><i>Programs allowed by role · synthetic sessions</i></div>
+    <div class="card plain" id="w3"><b>Input · two pages</b><i><u>Write a note</u>: type · dictate (browser speech-to-text)<br><u>Check a note</u>: paste a finished note, assess only</i></div>
+    <div class="card plain" id="w4"><b>Shared review screen · draft view</b><i>Program format, SOAP where used<br>Missing items shown as NOT PROVIDED</i></div>
+    <div class="card plain" id="w5"><b>Issues panel</b><i>Issue · element · rule · source · severity · fix</i></div>
+    <div class="card ai" id="w6"><b>Follow-up questions</b><i>"How did the client respond?"</i></div>
+    <div class="card plain" id="w7"><b>Overall status</b><i>Meets standards / Needs attention</i></div>
+    <div class="card human" id="w8"><b>Approve &amp; finalize</b><i>Clinician only · blocked while Critical issues open</i></div>
+  </div>
+
+  <div></div>
+
+  <div class="panel beP" id="beP">
+    <h2>Backend <small>Python FastAPI · one app, separate modules</small></h2>
+    <div class="be">
+      <div class="col">
+        <h3>① Write</h3>
+        <div class="card plain" id="ctx"><b>Session context</b><i>Pre-fills client, date, time, service type, modality, goals · no AI</i></div>
+        <div class="card ai" id="drf"><b>Drafter</b><i>Drafts progress note / plan update in program format; links interventions &amp; progress to goals</i></div>
+        <div class="card sec" id="grd"><b>No-invention guard</b><i>Every filled section must trace to clinician input, otherwise blank + flagged</i></div>
+      </div>
+      <div class="col">
+        <h3>② Assess</h3>
+        <div class="card rules" id="re"><b>Rule engine (deterministic)</b><i>Required fields, timelines, signatures, goal links</i></div>
+        <div class="card ai" id="cc"><b>Content checker</b><i>Intervention &amp; response, measurable progress, medical necessity</i></div>
+        <div class="card ai" id="fu"><b>Follow-up generator</b><i>One question per gap; answers re-draft</i></div>
+        <div class="card plain" id="st"><b>Status calculator</b><i>Any Critical → Needs attention</i></div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="wrapbox" id="wrap">
+      <div class="lbl">Provider wrappers <span>· 4 of 10 shown (see Provider Wrappers diagram) · built for real: Claude, Auth, Search, Audit</span></div>
+      <div class="g">
+        <div class="card sec" id="wAuth"><b>Auth</b><i>Verify token · program roles<br>oidc → Keycloak / Entra</i></div>
+        <div class="card rules" id="wSearch"><b>Retriever</b><i>Hybrid keyword + vector<br>pgvector / Qdrant / AI Search</i></div>
+        <div class="card ai" id="wLlm"><b>Claude client</b><i>Fixed output schema<br>Anthropic / Azure Foundry</i></div>
+        <div class="card sec" id="wAudit"><b>Audit logger</b><i>Hash-chained, versions used<br>Postgres / Azure</i></div>
+      </div>
+    </div>
+  </div>
+
+  <div></div>
+
+  <div class="ext">
+    <div class="stack">
+      <div class="panel sec-bg" id="kc"><h2>Keycloak</h2><div style="font-size:14px">OIDC sign-in<br>clinician / supervisor<br>+ program roles</div></div>
+      <div class="panel ai-bg" id="cl"><h2>Claude</h2><div style="font-size:14px">Anthropic API or<br>Azure Foundry<br>(set in config)</div></div>
+      <div class="panel sec-bg" id="env"><h2>.env</h2><div style="font-size:14px"><code>*_PROVIDER</code> settings<br>+ keys, never in code</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="gap2"></div>
+
+<div class="panel" id="dataP">
+  <h2>Data &amp; Content <small>versioned in git · stored in Postgres + pgvector</small></h2>
+  <div class="datarow">
+    <div class="card db rules" id="dlib"><b>Regulation library</b><i>5 programs + Medicaid / NYS · manifest with version &amp; hash</i></div>
+    <div class="card db plain" id="dpipe"><b>Content pipeline (offline)</b><i>Docling parse → section chunks → bge-small embeddings (local)</i></div>
+    <div class="card db plain" id="dpg"><b>Postgres + pgvector</b><i>KB chunks + vectors · notes, versions, audit log</i></div>
+    <div class="card db rules"><b>Rule sets + prompts</b><i>Per program + common Medicaid / NYS · each rule cites doc &amp; section</i></div>
+    <div class="card db plain"><b>Synthetic records</b><i>Clients, sessions, treatment plans</i></div>
+    <div class="card db plain"><b>Demo notes + evaluation</b><i>≥1 pass &amp; ≥1 fail per program · pass/fail matrix</i></div>
+  </div>
+</div>
+
+<div class="flow">
+  <h2>How a note moves through the system</h2>
+  <div class="steps">
+    <div class="step human"><span class="n">1</span><b>Sign in + select</b>Role sets program; pick synthetic session</div><span class="chev">›</span>
+    <div class="step human"><span class="n">2</span><b>Input</b>Write page: type or dictate. Check page: paste a note</div><span class="chev">›</span>
+    <div class="step"><span class="n">3</span><b>Draft</b>Write page only. Pre-filled, goal-linked, grounded in retrieved regulations</div><span class="chev">›</span>
+    <div class="step"><span class="n">4</span><b>Guard</b>Anything not provided → blank + flagged</div><span class="chev">›</span>
+    <div class="step"><span class="n">5</span><b>Assess</b>Rule engine + Claude content checks</div><span class="chev">›</span>
+    <div class="step"><span class="n">6</span><b>Issues + questions</b>Severity, source, fix; follow-ups</div><span class="chev">›</span>
+    <div class="step human"><span class="n">7</span><b>Review</b>Clinician edits &amp; answers → loop to 3</div><span class="chev">›</span>
+    <div class="step human"><span class="n">8</span><b>Approve</b>Status shown; clinician finalizes; audit logged</div>
+  </div>
+  <div class="note"><b>Guardrails:</b> AI never invents clinical facts · nothing is final without clinician approval · synthetic data only · no secrets in code · role-based access · every vendor behind a swappable wrapper</div>
+</div>
+
+<svg id="arrows" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1e3a5f"/>
+    </marker>
+  </defs>
+</svg>
+
+<script>
+(function () {
+  var page = document.querySelector('.page');
+  var svg = document.getElementById('arrows');
+  var NS = 'http://www.w3.org/2000/svg';
+  function size() { svg.setAttribute('width', page.offsetWidth); svg.setAttribute('height', page.offsetHeight); }
+  function R(id) {
+    var r = document.getElementById(id).getBoundingClientRect(), p = page.getBoundingClientRect();
+    return { l: r.left - p.left, r: r.right - p.left, t: r.top - p.top, b: r.bottom - p.top, w: r.width, h: r.height };
+  }
+  function pt(id, s, f) {
+    var r = R(id); f = (f === undefined) ? 0.5 : f;
+    if (s === 'l') return { x: r.l, y: r.t + r.h * f, o: 'h' };
+    if (s === 'r') return { x: r.r, y: r.t + r.h * f, o: 'h' };
+    if (s === 't') return { x: r.l + r.w * f, y: r.t, o: 'v' };
+    return { x: r.l + r.w * f, y: r.b, o: 'v' };
+  }
+  function A(from, fs, to, ts, o) {
+    o = o || {};
+    var a = pt(from, fs, o.ff), b = pt(to, ts, o.tf), pts;
+    if (a.o === 'h' && b.o === 'h') {
+      var xm = (o.mid !== undefined) ? o.mid : (a.x + b.x) / 2;
+      pts = (Math.abs(a.y - b.y) < 2) ? [a, b] : [a, { x: xm, y: a.y }, { x: xm, y: b.y }, b];
+    } else if (a.o === 'v' && b.o === 'v') {
+      var ym = (o.bus !== undefined) ? a.y + (b.y - a.y) * o.bus : (a.y + b.y) / 2;
+      pts = (Math.abs(a.x - b.x) < 2) ? [a, b] : [a, { x: a.x, y: ym }, { x: b.x, y: ym }, b];
+    } else if (a.o === 'h') {
+      pts = [a, { x: b.x, y: a.y }, b];
+    } else {
+      pts = [a, { x: a.x, y: b.y }, b];
+    }
+    var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+    var path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', d); path.setAttribute('fill', 'none'); path.setAttribute('stroke', '#1e3a5f');
+    path.setAttribute('stroke-width', '2.4'); path.setAttribute('stroke-linejoin', 'round');
+    if (o.dash) path.setAttribute('stroke-dasharray', '7 5');
+    path.setAttribute('marker-end', 'url(#ah)');
+    if (o.both) path.setAttribute('marker-start', 'url(#ah)');
+    svg.appendChild(path);
+    if (o.label) {
+      var best = 0, bi = 0;
+      for (var i = 0; i < pts.length - 1; i++) {
+        var len = Math.abs(pts[i + 1].x - pts[i].x) + Math.abs(pts[i + 1].y - pts[i].y);
+        if (len > best) { best = len; bi = i; }
+      }
+      var lx = (pts[bi].x + pts[bi + 1].x) / 2 + (o.dx || 0), ly = (pts[bi].y + pts[bi + 1].y) / 2 + (o.dy || 0);
+      var t = document.createElementNS(NS, 'text');
+      t.textContent = o.label; t.setAttribute('x', lx); t.setAttribute('y', ly + 4.5);
+      t.setAttribute('text-anchor', 'middle'); t.setAttribute('font-family', 'Segoe UI, Arial, sans-serif');
+      t.setAttribute('font-size', '12.5'); t.setAttribute('font-weight', '700'); t.setAttribute('fill', '#1e3a5f');
+      svg.appendChild(t);
+      var bb = t.getBBox();
+      var bg = document.createElementNS(NS, 'rect');
+      bg.setAttribute('x', bb.x - 4); bg.setAttribute('y', bb.y - 1); bg.setAttribute('width', bb.width + 8); bg.setAttribute('height', bb.height + 2);
+      bg.setAttribute('rx', 4); bg.setAttribute('fill', '#ffffff'); bg.setAttribute('stroke', '#cbd5e1');
+      svg.insertBefore(bg, t);
+    }
+  }
+  function draw() {
+    size();
+    // clinician path in the web app
+    for (var i = 1; i < 8; i++) A('w' + i, 'b', 'w' + (i + 1), 't');
+    // web app <-> backend
+    var wR = R('webP'), bR = R('beP');
+    A('webP', 'r', 'beP', 'l', { both: true, ff: 0.3, tf: 0.3, label: 'REST · JSON' });
+    // write path
+    A('ctx', 'b', 'drf', 't');
+    A('drf', 'b', 'grd', 't');
+    var gap = R('re').l - R('grd').r;
+    A('grd', 'r', 're', 'l', { label: 'draft', mid: R('grd').r + gap * 0.3, dy: 60 });
+    // assess path
+    A('re', 'b', 'cc', 't');
+    A('cc', 'b', 'fu', 't');
+    A('fu', 'b', 'st', 't');
+    A('fu', 'l', 'drf', 'r', { dash: true, label: 're-draft', ff: 0.5, tf: 0.5, mid: R('grd').r + gap * 0.7, dy: -20 });
+    // backend modules <-> wrappers
+    A('grd', 'b', 'wrap', 't', { both: true, label: 'interfaces only', tf: (R('grd').l + R('grd').w / 2 - R('wrap').l) / R('wrap').w });
+    // wrappers <-> external
+    A('wrap', 'r', 'kc', 'l', { ff: 0.22, both: true, label: 'verify token · roles', mid: R('wrap').r + 30 });
+    A('wrap', 'r', 'cl', 'l', { ff: 0.5, both: true, label: 'structured JSON', mid: R('wrap').r + 58 });
+    A('env', 'l', 'wrap', 'r', { dash: true, tf: 0.8, label: 'provider + keys', mid: R('wrap').r + 84, dy: 26 });
+    // backend <-> data
+    A('wrap', 'b', 'dataP', 't', { both: true, label: 'notes · audit · search', tf: (R('wrap').l + R('wrap').w * 0.5 - R('dataP').l) / R('dataP').w });
+    // data pipeline
+    A('dlib', 'r', 'dpipe', 'l', { label: 'parse + embed' });
+    A('dpipe', 'r', 'dpg', 'l', { label: 'index' });
+  }
+  window.addEventListener('load', function () { setTimeout(draw, 150); });
+})();
+</script>
+</div></body></html>

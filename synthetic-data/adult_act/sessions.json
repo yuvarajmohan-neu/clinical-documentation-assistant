@@ -1,0 +1,10 @@
+[
+  {
+    "client_external_id": "AACT-C001",
+    "scheduled_at": "2026-11-04T15:00:00+00:00",
+    "service_type": "ACT Team Visit",
+    "modality": "In-home",
+    "duration_minutes": 30,
+    "goal_ids": ["G1"]
+  }
+]

@@ -1,0 +1,67 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css">
+<style>
+.layers { display: grid; grid-template-columns: 1fr; gap: 0; }
+.biz { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.biz .card { margin-bottom: 0; text-align: center; }
+.mid { text-align: center; color: #1e3a5f; font-weight: 600; font-size: 14px; margin: 8px 0; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14.5px; background: #fff; border: 2px solid #cbd5e1; border-radius: 12px; overflow: hidden; }
+th { background: #1e3a5f; color: #fff; text-align: left; padding: 10px 12px; font-size: 14px; letter-spacing: .4px; }
+td { padding: 9px 12px; border-top: 1px solid #e2e8f0; vertical-align: top; line-height: 1.35; }
+td:first-child { border-left: 6px solid #94a3b8; font-weight: 700; color: #111827; white-space: nowrap; }
+tr.ai td:first-child { border-left-color: #15803d; }
+tr.sec td:first-child { border-left-color: #b91c1c; }
+tr.rules td:first-child { border-left-color: #b45309; }
+tr.plain td:first-child { border-left-color: #64748b; }
+td code, .foot code { font-family: Consolas, monospace; font-size: 13px; background: #f1f5f9; padding: 1px 5px; border-radius: 4px; }
+td.proto { background: #f0fdf4; }
+td.prod { background: #eff6ff; }
+th.proto { background: #15803d; } th.prod { background: #1d4ed8; }
+.st { font-weight: 700; font-size: 13px; white-space: nowrap; }
+.st.real { color: #15803d; } .st.min { color: #b45309; } .st.desc { color: #64748b; }
+.foot { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 18px; }
+.foot .panel { font-size: 14px; line-height: 1.45; }
+.foot .panel h2 { font-size: 15px; margin-bottom: 6px; }
+</style></head><body><div class="page">
+
+<header>
+  <div><h1>Clinical Documentation Assistant · Provider Wrappers</h1>
+  <div class="sub">Business code talks only to interfaces. Each adapter is chosen in <b>.env</b>, so switching vendor = config change + one adapter file.</div></div>
+  <div class="legend">
+    <span><i class="sw ai-bg"></i>AI</span>
+    <span><i class="sw sec-bg"></i>Security</span>
+    <span><i class="sw rules-bg"></i>Knowledge / rules</span>
+    <span><i class="sw plain-bg"></i>Platform</span>
+  </div>
+</header>
+
+<div class="biz">
+  <div class="card plain"><b>Drafter</b></div>
+  <div class="card plain"><b>Rule engine</b></div>
+  <div class="card plain"><b>Content checker</b></div>
+  <div class="card plain"><b>Follow-ups</b></div>
+  <div class="card plain"><b>Ingest pipeline</b></div>
+  <div class="card plain"><b>API routes</b></div>
+</div>
+<div class="mid">▼ depend only on interfaces in <code>backend/providers/&lt;capability&gt;/base.py</code> · <code>registry.py</code> builds the adapter named in .env ▼</div>
+
+<table>
+  <tr><th>Capability</th><th>Interface</th><th class="proto">Prototype adapter (open source)</th><th>Prototype status</th><th class="prod">Production / alternatives</th><th>.env setting</th></tr>
+  <tr class="ai"><td>Claude</td><td><code>complete_structured(prompt_id, vars, schema)</code></td><td class="proto">anthropic (direct API) · <code>fake</code> replay for offline demo</td><td class="st real">Real</td><td class="prod">azure_foundry</td><td><code>LLM_PROVIDER</code></td></tr>
+  <tr class="sec"><td>Identity &amp; roles</td><td><code>verify(token) → Principal</code></td><td class="proto"><code>dev</code> stub first · <b>Keycloak</b> via generic OIDC if time allows</td><td class="st real">Real (dev first)</td><td class="prod">Microsoft Entra ID (same OIDC adapter)</td><td><code>AUTH_PROVIDER</code>, <code>OIDC_ISSUER</code></td></tr>
+  <tr class="rules"><td>Document parsing</td><td><code>parse(path) → Section[]</code></td><td class="proto"><b>Docling</b> · pypdf fallback</td><td class="st min">Minimal</td><td class="prod">Azure AI Document Intelligence</td><td><code>PARSER_PROVIDER</code></td></tr>
+  <tr class="rules"><td>Embeddings</td><td><code>embed(texts) → vectors</code></td><td class="proto"><b>bge-small-en-v1.5</b> (sentence-transformers, local CPU)</td><td class="st min">Minimal</td><td class="prod">Keep local in container, or a BAA-covered vendor</td><td><code>EMBEDDINGS_PROVIDER</code></td></tr>
+  <tr class="rules"><td>Search index</td><td><code>upsert(chunks)</code> · <code>search(q, programs, k)</code></td><td class="proto"><b>Postgres + pgvector</b> + full-text, fused (hybrid)</td><td class="st real">Real</td><td class="prod">Azure AI Search · Qdrant · Azure Postgres + pgvector</td><td><code>SEARCH_PROVIDER</code></td></tr>
+  <tr class="plain"><td>File storage</td><td><code>put / get / list(versions)</code></td><td class="proto">Local folder (git-versioned)</td><td class="st min">Minimal</td><td class="prod">Azure Blob · S3-compatible</td><td><code>BLOB_PROVIDER</code></td></tr>
+  <tr class="plain"><td>Speech-to-text</td><td><code>transcribe(audio) → text</code></td><td class="proto">Browser Web Speech API (Chrome / Edge only)</td><td class="st min">Minimal</td><td class="prod">Azure AI Speech (BAA) · faster-whisper (local)</td><td><code>SPEECH_PROVIDER</code></td></tr>
+  <tr class="sec"><td>Secrets</td><td><code>get(name)</code></td><td class="proto">.env (git-ignored)</td><td class="st min">Minimal</td><td class="prod">Azure Key Vault · OpenBao</td><td><code>SECRETS_PROVIDER</code></td></tr>
+  <tr class="sec"><td>Audit log</td><td><code>append(event)</code></td><td class="proto">Postgres, hash-chained, append-only</td><td class="st real">Real</td><td class="prod">Azure immutable storage / Log Analytics</td><td><code>AUDIT_PROVIDER</code></td></tr>
+  <tr class="plain"><td>Telemetry</td><td>OpenTelemetry (open standard)</td><td class="proto">Console exporter</td><td class="st desc">Describe only</td><td class="prod">Azure Monitor exporter</td><td><code>OTEL_EXPORTER</code></td></tr>
+</table>
+
+<div class="foot">
+  <div class="panel"><h2>Rules for every wrapper</h2><b>Real</b> = built and tested. <b>Minimal</b> = interface plus one simple adapter. <b>Describe only</b> = documented, not built.<br>Adapters return <b>our</b> types (Passage, Principal, Issue), never SDK objects. No vendor import outside <code>providers/</code>.</div>
+  <div class="panel"><h2>Proven before switching</h2>Contract tests in <code>tests/providers/</code> run the same suite on every adapter. The evaluation matrix must not change after a switch.</div>
+  <div class="panel"><h2>Runs locally</h2><code>docker compose up</code> → Postgres + pgvector, Keycloak (synthetic realm), backend, frontend. All Apache-2.0 / MIT / PostgreSQL licensed.</div>
+</div>
+
+</div></body></html>

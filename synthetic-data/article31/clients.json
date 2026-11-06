@@ -1,0 +1,36 @@
+[
+  {
+    "external_id": "ART31-C001",
+    "name": "Jamie Rivera (synthetic)",
+    "dob": "1990-03-14",
+    "diagnosis_summary": "Generalized Anxiety Disorder (F41.1) — synthetic/role-played case for demo purposes only.",
+    "goals": [
+      {
+        "goal_id": "G1",
+        "description": "Reduce frequency of panic episodes from 4x/week to 1x/week",
+        "target_date": "2027-02-01",
+        "status": "active"
+      },
+      {
+        "goal_id": "G2",
+        "description": "Practice grounding technique daily and log triggers",
+        "target_date": "2026-12-15",
+        "status": "active"
+      }
+    ]
+  },
+  {
+    "external_id": "ART31-C002",
+    "name": "Morgan Lee (synthetic)",
+    "dob": "1985-07-22",
+    "diagnosis_summary": "Major Depressive Disorder, moderate (F33.1) — synthetic/role-played case for demo purposes only.",
+    "goals": [
+      {
+        "goal_id": "G1",
+        "description": "Attend weekly individual therapy without cancellation for 8 consecutive weeks",
+        "target_date": "2027-01-10",
+        "status": "active"
+      }
+    ]
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "client_external_id": "APT-C001",
+    "scheduled_at": "2026-11-05T16:00:00+00:00",
+    "service_type": "Supportive Housing Check-in",
+    "modality": "In-person",
+    "duration_minutes": 30,
+    "goal_ids": ["G1"]
+  }
+]

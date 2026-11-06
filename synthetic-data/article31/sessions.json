@@ -1,0 +1,18 @@
+[
+  {
+    "client_external_id": "ART31-C001",
+    "scheduled_at": "2026-11-06T19:05:00+00:00",
+    "service_type": "Individual Therapy",
+    "modality": "In-person",
+    "duration_minutes": 45,
+    "goal_ids": ["G1", "G2"]
+  },
+  {
+    "client_external_id": "ART31-C002",
+    "scheduled_at": "2026-10-30T18:30:00+00:00",
+    "service_type": "Individual Therapy",
+    "modality": "Telehealth",
+    "duration_minutes": 50,
+    "goal_ids": ["G1"]
+  }
+]

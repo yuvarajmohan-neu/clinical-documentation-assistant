@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>How the App Works</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Lora:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange:#f36c21; --yellow:#faa21b; --blue:#2261ae; --calm:#a1c1e6;
+    --purple:#a3238e; --lav:#dd9dc6; --green:#1a5a40; --spring:#d6e040;
+    --brick:#b04c32; --soft:#f1eee7; --black:#231f20; --white:#ffffff;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--soft); color:var(--black); font-family:Inter, Arial, sans-serif; text-align:left; }
+  .page { width:1600px; padding:44px 48px 40px; }
+
+  h1 { font-family:Lora, Georgia, serif; font-weight:500; font-size:42px; color:var(--blue); }
+  .sub { font-size:19px; margin-top:8px; }
+  .rule { height:4px; background:var(--orange); border-radius:2px; margin:22px 0 26px; width:120px; }
+
+  .label { font-weight:900; font-size:14px; letter-spacing:1.4px; text-transform:uppercase; color:var(--blue); margin-bottom:12px; }
+
+  /* Workflow */
+  .steps { display:grid; grid-template-columns:repeat(6, 1fr); gap:34px; position:relative; }
+  .step { background:var(--white); border-radius:22px; padding:18px 18px 16px; position:relative; border:2px solid var(--blue); }
+  .step:not(:last-child)::after { content:"\203A"; position:absolute; right:-26px; top:50%; transform:translateY(-55%); font-size:40px; font-weight:800; color:var(--orange); }
+  .num { width:32px; height:32px; border-radius:50%; background:var(--orange); color:var(--white); font-weight:800; font-size:16px; display:flex; align-items:center; justify-content:center; }
+  .step h3 { font-size:19px; font-weight:800; margin:10px 0 4px; color:var(--blue); }
+  .step p { font-size:14.5px; line-height:1.33; min-height:58px; }
+  .tech { display:inline-block; margin-top:10px; background:var(--blue); color:var(--white); font-size:13px; font-weight:600; padding:5px 11px; border-radius:999px; }
+  .step.human { border-color:var(--blue); }
+
+  /* Layers */
+  .layers { margin-top:36px; }
+  .band { background:var(--white); border-radius:24px; padding:18px 22px 20px; border:2px solid var(--calm); }
+  .band-head { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+  .band-head h2 { font-size:21px; font-weight:800; }
+  .pill { font-size:14px; font-weight:600; padding:6px 14px; border-radius:999px; color:var(--white); }
+  .grid6 { display:grid; grid-template-columns:repeat(6, 1fr); gap:16px; }
+  .chip { background:var(--soft); border-radius:14px; padding:10px 12px; font-size:15px; font-weight:600; }
+  .down { text-align:left; padding-left:50%; font-size:26px; color:var(--blue); line-height:1; margin:6px 0; font-weight:800; }
+
+  .web h2 { color:var(--blue); }       .web .pill { background:var(--blue); }
+  .api h2 { color:var(--green); }      .api .pill { background:var(--green); }
+  .api { border-color:var(--green); }  .web { border-color:var(--blue); }
+
+  .wrap { border:3px solid var(--orange); position:relative; }
+  .wrap h2 { color:var(--orange); }
+  .wrap .pill { background:var(--orange); }
+  .wrap .star { position:absolute; top:-15px; right:26px; background:var(--orange); color:var(--white); font-weight:900; font-size:13px; letter-spacing:1.2px; text-transform:uppercase; padding:6px 14px; border-radius:999px; }
+  .wrap .why { font-size:15.5px; margin:-4px 0 14px; }
+  .wrap .chip { background:var(--orange); color:var(--white); text-align:left; }
+
+  .services { margin-top:4px; }
+  .svc { background:var(--white); border-radius:20px; overflow:hidden; border:2px solid var(--blue); display:flex; flex-direction:column; }
+  .svc .hd { background:var(--blue); color:var(--white); font-weight:800; font-size:16.5px; padding:11px 14px; }
+  .svc .bd { padding:12px 14px 14px; flex:1; display:flex; flex-direction:column; gap:4px; }
+  .svc .k { font-size:11.5px; font-weight:900; letter-spacing:1.2px; text-transform:uppercase; }
+  .svc .proto { font-size:15px; font-weight:600; color:var(--blue); line-height:1.33; min-height:40px; }
+  .svc .prod { font-size:15px; font-weight:600; color:var(--green); line-height:1.33; }
+  .svc .sep { border-top:2px dashed var(--calm); margin:6px 0 4px; }
+
+  .connectors { display:grid; grid-template-columns:repeat(6, 1fr); gap:16px; }
+  .connectors div { text-align:left; padding-left:calc(50% - 6px); font-size:24px; color:var(--orange); font-weight:800; line-height:1; margin:4px 0; }
+
+  .foot { margin-top:26px; display:flex; gap:16px; }
+  .foot .box { flex:1; background:var(--white); border-radius:18px; padding:14px 18px; font-size:15px; line-height:1.4; border-left:8px solid var(--green); }
+  .foot .box b { color:var(--green); }
+  .foot .box.o { border-left-color:var(--orange); }
+  .foot .box.o b { color:var(--orange); }
+  .brand { margin-top:20px; font-size:14px; font-weight:600; color:var(--blue); }
+  .brand span { color:var(--orange); }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Clinical Documentation Assistant: how it works</h1>
+  <div class="sub">From session notes to an approved, compliant note, with the clinician in control at every step.</div>
+  <div class="rule"></div>
+
+  <div class="label">The workflow</div>
+  <div class="steps">
+    <div class="step human"><div class="num">1</div><h3>Sign in</h3><p>Role sets the program and its rules.</p><span class="tech">Keycloak (OIDC)</span></div>
+    <div class="step human"><div class="num">2</div><h3>Write or check</h3><p>Write a note: type or dictate, session pre-filled. Check a note: paste one written elsewhere.</p><span class="tech">React · Web Speech</span></div>
+    <div class="step"><div class="num">3</div><h3>Draft</h3><p>Write page only. Program format, linked to goals. Gaps left blank and flagged.</p><span class="tech">Claude</span></div>
+    <div class="step"><div class="num">4</div><h3>Check</h3><p>Rule checks + AI checks. Every issue cites its source.</p><span class="tech">Rule engine · Claude</span></div>
+    <div class="step human"><div class="num">5</div><h3>Fix gaps</h3><p>Answer follow-up questions and edit the draft.</p><span class="tech">Claude · React</span></div>
+    <div class="step human"><div class="num">6</div><h3>Approve</h3><p>Clinician signs off. Blocked while a Critical issue is open.</p><span class="tech">Postgres audit log</span></div>
+  </div>
+
+  <div class="layers">
+    <div class="label">The layers and tech stack</div>
+
+    <div class="band web">
+      <div class="band-head"><h2>Web app</h2><span class="pill">React (Vite) · Web Speech API · The Jewish Board brand</span></div>
+      <div class="grid6">
+        <div class="chip">Program selector</div><div class="chip">Write a note page</div><div class="chip">Check a note page</div>
+        <div class="chip">Shared review: draft + issues</div><div class="chip">Status banner</div><div class="chip">Approve</div>
+      </div>
+    </div>
+    <div class="down">&#8597;</div>
+
+    <div class="band api">
+      <div class="band-head"><h2>Backend services</h2><span class="pill">Python · FastAPI</span></div>
+      <div class="grid6">
+        <div class="chip">Session context</div><div class="chip">Drafter</div><div class="chip">No-invention guard</div>
+        <div class="chip">Rule engine</div><div class="chip">Content checker</div><div class="chip">Follow-ups + approval</div>
+      </div>
+    </div>
+    <div class="down">&#8597;</div>
+
+    <div class="band wrap">
+      <span class="star">&#9733; Key design idea</span>
+      <div class="band-head"><h2>Provider wrappers (swappable connectors)</h2><span class="pill">Switch by settings, no code rewrite</span></div>
+      <div class="why">The app talks only to these connectors, never to a vendor directly. A settings file decides which product sits behind each one. Ten connectors in all, shown here as six groups.</div>
+      <div class="grid6">
+        <div class="chip">AI connector</div><div class="chip">Sign-in connector</div><div class="chip">Search connector</div>
+        <div class="chip">Data &amp; audit connector</div><div class="chip">Speech connector</div><div class="chip">Secrets connector</div>
+      </div>
+    </div>
+
+    <div class="connectors"><div>&#8595;</div><div>&#8595;</div><div>&#8595;</div><div>&#8595;</div><div>&#8595;</div><div>&#8595;</div></div>
+
+    <div class="grid6 services">
+      <div class="svc"><div class="hd">AI model</div><div class="bd">
+        <div class="k">Prototype</div><div class="proto">Claude (Anthropic API)</div><div class="sep"></div>
+        <div class="k">Jewish Board production</div><div class="prod">Claude via Azure AI Foundry</div></div></div>
+      <div class="svc"><div class="hd">Sign-in &amp; roles</div><div class="bd">
+        <div class="k">Prototype</div><div class="proto">Keycloak (OIDC)</div><div class="sep"></div>
+        <div class="k">Jewish Board production</div><div class="prod">Microsoft Entra ID</div></div></div>
+      <div class="svc"><div class="hd">Regulation search</div><div class="bd">
+        <div class="k">Prototype</div><div class="proto">Docling · bge-small · Postgres + pgvector</div><div class="sep"></div>
+        <div class="k">Jewish Board production</div><div class="prod">Azure AI Search + Blob Storage</div></div></div>
+      <div class="svc"><div class="hd">Notes &amp; audit log</div><div class="bd">
+        <div class="k">Prototype</div><div class="proto">Postgres (hash-chained log)</div><div class="sep"></div>
+        <div class="k">Jewish Board production</div><div class="prod">Azure SQL + immutable audit log</div></div></div>
+      <div class="svc"><div class="hd">Dictation</div><div class="bd">
+        <div class="k">Prototype</div><div class="proto">Browser Web Speech API</div><div class="sep"></div>
+        <div class="k">Jewish Board production</div><div class="prod">Azure AI Speech (under BAA)</div></div></div>
+      <div class="svc"><div class="hd">Secrets &amp; keys</div><div class="bd">
+        <div class="k">Prototype</div><div class="proto">Settings file (never in code)</div><div class="sep"></div>
+        <div class="k">Jewish Board production</div><div class="prod">Azure Key Vault</div></div></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="box o"><b>Moving to production:</b> add one connector and change one setting per service. The clinical logic, rules and screens stay the same, and automated tests prove each new connector behaves like the old one.</div>
+    <div class="box"><b>Guardrails:</b> AI never invents clinical facts (gaps stay [NOT PROVIDED]) · every rule cites its NYS source · clinician approves everything · synthetic data only · every draft, edit and approval is logged.</div>
+  </div>
+  <div class="brand">The Jewish Board <span>·</span> Hackathon Idea C <span>·</span> Prototype design, synthetic data only</div>
+</div>
+</body>
+</html>

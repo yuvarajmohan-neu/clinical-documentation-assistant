@@ -1,0 +1,183 @@
+:root {
+  /* Primary */
+  --jb-orange: #f36c21;
+  --jb-yellow: #faa21b;
+
+  /* Secondary */
+  --jb-blue: #2261ae;
+  --jb-blue-light: #a1c1e6;
+  --jb-purple: #a3238e;
+  --jb-lavender: #dd9dc6;
+  --jb-green: #1a5a40;
+  --jb-green-spring: #d6e040;
+
+  /* Supporting */
+  --jb-red: #b04c32;
+  --jb-white-soft: #f1eee7;
+  --jb-black: #231f20;
+  --jb-white: #ffffff;
+
+  /* Semantic */
+  --jb-bg: var(--jb-white-soft);
+  --jb-bg-card: var(--jb-white);
+  --jb-text: var(--jb-black);
+  --jb-heading: var(--jb-blue);
+  --jb-accent: var(--jb-orange);
+  --jb-border: #e0dcd6;
+
+  /* Severity (team decision pending per p1-react-walkthrough.md §4) */
+  --jb-severity-critical: var(--jb-red);
+  --jb-severity-warning: var(--jb-yellow);
+  --jb-severity-info: var(--jb-blue);
+
+  /* Radii — the rounded-frame signature */
+  --jb-radius-sm: 8px;
+  --jb-radius-md: 14px;
+  --jb-radius-lg: 20px;
+  --jb-radius-xl: 28px;
+
+  /* Layout */
+  --jb-max-width: 1200px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    "Indivisible",
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  color: var(--jb-text);
+  background-color: var(--jb-bg);
+  line-height: 1.33;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Mackinac Pro", "Lora", Georgia, serif;
+  color: var(--jb-heading);
+  font-weight: 500;
+  text-align: left;
+  margin: 0 0 12px;
+}
+
+p {
+  margin: 0 0 12px;
+  text-align: left;
+}
+
+button {
+  font-family: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.jb-main {
+  max-width: var(--jb-max-width);
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.jb-header {
+  background: var(--jb-white);
+  border-bottom: 2px solid var(--jb-orange);
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.jb-header-title {
+  font-size: 18px;
+  margin: 0;
+}
+
+.jb-header-tagline {
+  font-family: "Indivisible", "Inter", sans-serif;
+  font-size: 13px;
+  color: var(--jb-text);
+  margin: 0;
+}
+
+.jb-card {
+  background: var(--jb-bg-card);
+  border-radius: var(--jb-radius-lg);
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(35, 31, 32, 0.08);
+  border: 1px solid var(--jb-border);
+}
+
+.jb-btn-primary {
+  background: var(--jb-orange);
+  color: white;
+  border: none;
+  border-radius: var(--jb-radius-md);
+  padding: 12px 24px;
+  font-family: "Indivisible", "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.jb-btn-primary:hover {
+  background: #d95e1a;
+}
+
+.jb-btn-primary:disabled {
+  background: var(--jb-border);
+  color: var(--jb-text);
+  cursor: not-allowed;
+}
+
+.jb-signin {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.jb-signin-card {
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.jb-signin-tagline {
+  font-family: "Mackinac Pro", "Lora", Georgia, serif;
+  color: var(--jb-orange);
+  font-style: italic;
+}
+
+.jb-signin-card .jb-btn-primary {
+  margin-top: 12px;
+}
+
+.jb-badge-demo {
+  display: inline-block;
+  background: var(--jb-purple);
+  color: white;
+  font-family: "Indivisible", "Inter", sans-serif;
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: var(--jb-radius-sm);
+  padding: 4px 10px;
+}

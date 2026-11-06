@@ -1,0 +1,16 @@
+[
+  {
+    "external_id": "HH-C001",
+    "name": "Casey Brooks (synthetic)",
+    "dob": "1965-09-08",
+    "diagnosis_summary": "Type 2 Diabetes with comorbid Major Depressive Disorder — synthetic/role-played case for demo purposes only.",
+    "goals": [
+      {
+        "goal_id": "G1",
+        "description": "Attend all scheduled specialist appointments and maintain A1C below 8.0",
+        "target_date": "2027-04-01",
+        "status": "active"
+      }
+    ]
+  }
+]

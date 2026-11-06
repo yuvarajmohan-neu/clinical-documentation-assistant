@@ -1,0 +1,16 @@
+[
+  {
+    "external_id": "APT-C001",
+    "name": "Riley Carter (synthetic)",
+    "dob": "1982-01-27",
+    "diagnosis_summary": "Major Depressive Disorder with history of housing instability — synthetic/role-played case for demo purposes only.",
+    "goals": [
+      {
+        "goal_id": "G1",
+        "description": "Maintain apartment lease compliance and attend weekly check-ins",
+        "target_date": "2027-05-01",
+        "status": "active"
+      }
+    ]
+  }
+]

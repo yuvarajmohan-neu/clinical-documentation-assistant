@@ -1,0 +1,117 @@
+{
+  "realm": "jb-demo",
+  "enabled": true,
+  "displayName": "Jewish Board — Clinical Documentation Assistant (DEMO)",
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+
+  "roles": {
+    "realm": [
+      { "name": "clinician", "description": "Can draft, edit and approve notes for their assigned program(s)." },
+      { "name": "supervisor", "description": "Can view all programs; cannot approve another clinician's note." },
+      { "name": "program:adult_act", "description": "Adult ACT program access." },
+      { "name": "program:youth_act", "description": "Youth ACT program access." },
+      { "name": "program:health_home", "description": "Health Home Care Coordination program access." },
+      { "name": "program:apt_treatment", "description": "Apartment Treatment Housing program access." },
+      { "name": "program:article31", "description": "Article 31 outpatient clinic program access." }
+    ]
+  },
+
+  "clients": [
+    {
+      "clientId": "cda-web",
+      "name": "CDA Web App",
+      "description": "Public SPA client, PKCE only, no client secret.",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "redirectUris": [
+        "http://localhost:5173/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5173"
+      ],
+      "protocolMappers": [
+        {
+          "name": "cda-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "cda-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "cda-api",
+      "name": "CDA Backend API",
+      "description": "Resource-server client. Represents the token audience the FastAPI backend validates against. Not used for login.",
+      "enabled": true,
+      "publicClient": false,
+      "bearerOnly": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false
+    }
+  ],
+
+  "users": [
+    {
+      "username": "art31.clinician",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "art31.clinician@example-demo.invalid",
+      "firstName": "Alex",
+      "lastName": "RiveraDemo",
+      "credentials": [
+        { "type": "password", "value": "demo-pass-not-real", "temporary": false }
+      ],
+      "realmRoles": ["clinician", "program:article31"]
+    },
+    {
+      "username": "act.clinician",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "act.clinician@example-demo.invalid",
+      "firstName": "Jordan",
+      "lastName": "KimDemo",
+      "credentials": [
+        { "type": "password", "value": "demo-pass-not-real", "temporary": false }
+      ],
+      "realmRoles": ["clinician", "program:adult_act", "program:youth_act"]
+    },
+    {
+      "username": "supervisor",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "supervisor@example-demo.invalid",
+      "firstName": "Sam",
+      "lastName": "TaylorDemo",
+      "credentials": [
+        { "type": "password", "value": "demo-pass-not-real", "temporary": false }
+      ],
+      "realmRoles": [
+        "supervisor",
+        "program:adult_act",
+        "program:youth_act",
+        "program:health_home",
+        "program:apt_treatment",
+        "program:article31"
+      ]
+    }
+  ]
+}

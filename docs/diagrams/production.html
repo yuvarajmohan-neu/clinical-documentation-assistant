@@ -1,0 +1,255 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css">
+<style>
+.page { position: relative; }
+header h1 { white-space: nowrap; }
+header .sub { max-width: 980px; }
+.legend { white-space: nowrap; gap: 14px; font-size: 14px; }
+svg#arrows { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+.row1 { display: grid; grid-template-columns: 210px 70px 300px 90px 1fr 90px 300px; align-items: stretch; }
+.row1 > .gapc { }
+.entry .card { margin-bottom: 30px; }
+.app { display: grid; grid-template-columns: 1fr 1fr; gap: 30px 64px; }
+.app .card { margin-bottom: 0; }
+.app .wide { grid-column: 1 / -1; }
+.users { display: flex; flex-direction: column; justify-content: center; text-align: center; }
+.ext { display: flex; flex-direction: column; }
+.ext .stack { flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 18px; }
+.ext .card { margin-bottom: 0; }
+.gap2 { height: 78px; }
+.row2 { display: grid; grid-template-columns: 1.35fr 1fr 1fr; gap: 64px; }
+.row2 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row2 .grid .card { margin-bottom: 0; }
+.pipe .card { margin-bottom: 30px; }
+.pipe .card:last-child { margin-bottom: 0; }
+.ops .card { margin-bottom: 9px; }
+code { font-family: Consolas, monospace; font-size: 12.5px; background: #f1f5f9; padding: 0 4px; border-radius: 3px; }
+.place { margin-top: 22px; display: grid; grid-template-columns: 1.7fr 1fr; gap: 18px; }
+.place .panel h2 { margin-bottom: 8px; }
+.rgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.rgs .card { margin-bottom: 0; font-size: 13.5px; }
+.rgs .card b { font-size: 14px; font-family: Consolas, monospace; }
+.open { border-color: #b45309; background: #fffbeb; }
+.open ul { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.4; color: #374151; }
+.gov { margin-top: 20px; border: 2px solid #b91c1c; background: #fef2f2; border-radius: 14px; padding: 14px 18px; }
+.gov h2 { font-size: 18px; text-transform: uppercase; letter-spacing: 1px; color: #b91c1c; margin-bottom: 8px; }
+.gov ul { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px 26px; list-style: none; font-size: 14.5px; }
+.gov li::before { content: "■ "; color: #b91c1c; }
+.legend .ln { width: 26px; height: 0; border-top: 3px solid #1e3a5f; display: inline-block; }
+.legend .ln.d { border-top-style: dashed; }
+</style></head><body><div class="page">
+
+<header>
+  <div><h1>Clinical Documentation Assistant · Target Production (Azure)</h1>
+  <div class="sub">Pilot architecture on Jewish Board Azure standards (Prod subscription, East US). Requires organizational, clinical, privacy, security and legal review first.</div></div>
+  <div class="legend">
+    <span><i class="sw human-bg"></i>Clinician</span>
+    <span><i class="sw ai-bg"></i>Claude (AI)</span>
+    <span><i class="sw rules-bg"></i>Rules</span>
+    <span><i class="sw sec-bg"></i>Security</span>
+    <span><i class="ln"></i>Data flow</span>
+    <span><i class="ln d"></i>Identity / ops</span>
+  </div>
+</header>
+
+<div class="row1">
+  <div class="panel human-bg users" id="clin"><h2 style="justify-content:center">Clinicians</h2><div style="font-size:14px">Desktop · tablet<br>Program set by role</div></div>
+
+  <div></div>
+
+  <div class="panel entry" id="entryP">
+    <h2>Entry &amp; Identity</h2>
+    <div class="card sec" id="fd"><b>Front Door + WAF</b><i>Public entry point · HTTPS only</i></div>
+    <div class="card sec" id="apim"><b>API Management</b><i><code>apim-cda-prod-eus-001</code> · token check · rate limits</i></div>
+    <div class="card sec" id="ent"><b>Microsoft Entra ID</b><i>Single tenant · groups map to program roles · MSAL bearer token (iss, aud, tid checked)</i></div>
+  </div>
+
+  <div></div>
+
+  <div class="panel" id="appP">
+    <h2>Application <small>App Service (Linux) · VNet integration · system-assigned managed identity</small></h2>
+    <div class="app">
+      <div class="card plain wide" id="orch"><b>Web app + API orchestrator</b><i><code>app-cda-prod-eus-001</code> · program selector, input, draft view, issues panel, status, approve (JB brand, 12h ET)</i></div>
+      <div class="card plain" id="ctx"><b>Session context</b><i>Pre-fills details from EHR · no AI</i></div>
+      <div class="card ai" id="fu"><b>Follow-up generator</b><i>Gap questions for the clinician</i></div>
+      <div class="card ai" id="drf"><b>Drafter</b><i>Program format, goal-linked</i></div>
+      <div class="card ai" id="cc"><b>Content checker</b><i>Response, progress, medical necessity</i></div>
+      <div class="card sec" id="grd"><b>No-invention guard</b><i>Untraceable content → blank + flagged · pasted text de-identified</i></div>
+      <div class="card rules" id="re"><b>Rule engine</b><i>Deterministic fields &amp; timelines</i></div>
+      <div class="card ai wide" id="gw"><b>Claude gateway</b><i>The only route to Claude for drafting, content checks and follow-ups · prompt registry · schema validation · citation check · usage log</i></div>
+      <div class="card plain wide" id="rem"><b>Reminders (optional)</b><i>Plan review due · note overdue</i></div>
+    </div>
+  </div>
+
+  <div></div>
+
+  <div class="panel ext" id="extP">
+    <h2>External Services <small>signed BAA each</small></h2>
+    <div class="stack">
+      <div class="card plain" id="speech"><b>Azure AI Speech</b><i>Dictation to text · private endpoint</i></div>
+      <div class="card plain" id="ehr"><b>EHR</b><i>FHIR / HL7 interface: client, session, treatment plan in; approved note out</i></div>
+      <div class="card ai" id="claude"><b>Claude</b><i>Azure AI Foundry, JB-approved route · private endpoint</i></div>
+    </div>
+  </div>
+</div>
+
+<div class="gap2"></div>
+
+<div class="row2">
+  <div class="panel" id="dataP">
+    <h2>Data <small>encrypted at rest · public access disabled · private endpoints</small></h2>
+    <div class="grid">
+      <div class="card db plain" id="dsql"><b>Azure SQL</b><i><code>sqldb-cda-prod-eus-001</code> · notes, versions, approvals · Entra auth only</i></div>
+      <div class="card db rules" id="dblob"><b>Blob storage</b><i><code>stcdaprodeus001</code> · source documents, versioned</i></div>
+      <div class="card db sec" id="daudit"><b>Immutable audit log</b><i>Every draft, edit, approval + versions · hash-chained</i></div>
+      <div class="card db rules" id="dsearch"><b>Azure AI Search</b><i>Regulation index, keyword + vector</i></div>
+      <div class="card db rules" style="grid-column:1/-1" id="dgit"><b>Git repo: rule sets + prompts</b><i>Versioned; changes reviewed by compliance before release</i></div>
+    </div>
+  </div>
+  <div class="panel pipe" id="pipeP">
+    <h2>Content Pipeline</h2>
+    <div class="card rules" id="psrc"><b>Source documents</b><i>NYS guidance for 5 programs + Medicaid / NYS documentation standards</i></div>
+    <div class="card plain" id="ping"><b>Ingest &amp; chunk</b><i>Doc id + section on every chunk → AI Search</i></div>
+    <div class="card human" id="pauth"><b>Rule authoring</b><i>Compliance staff write and review rules; each cites document &amp; section</i></div>
+  </div>
+  <div class="panel ops" id="opsP">
+    <h2>Platform Operations</h2>
+    <div class="card sec"><b>Key Vault</b><i><code>kv-cda-prod-eus-001</code> · RBAC · purge protection · no public access</i></div>
+    <div class="card plain"><b>App Insights + Log Analytics</b><i><code>appi-cda-prod-eus-001</code> → <code>log-shared-prod-eus-001</code> · diagnostics on every resource</i></div>
+    <div class="card plain"><b>Defender for Cloud · SIEM</b><i>Threat protection, log forwarding (confirm with IT security)</i></div>
+    <div class="card plain"><b>Backup &amp; disaster recovery</b><i>Database, search index, source documents</i></div>
+    <div class="card plain"><b>GitHub Actions + Bicep</b><i>OIDC, no secrets · <code>develop</code> → Dev automatic · <code>main</code> → Prod after approval · evaluation gate on the synthetic pass/fail set</i></div>
+  </div>
+</div>
+
+<div class="place">
+  <div class="panel">
+    <h2>Where it lives <small>JB resource group layout · Dev mirrors Prod in the Dev subscription · nothing crosses subscriptions</small></h2>
+    <div class="rgs">
+      <div class="card plain"><b>rg-shared-prod-eus-001</b><i>Network only: VNet, subnets, NSGs, private DNS zones</i></div>
+      <div class="card plain"><b>rg-cda-prod-eus-001</b><i>App Service, SQL, Storage, Key Vault, App Insights, AI Search, and every private endpoint</i></div>
+      <div class="card plain"><b>rg-shared-monitoring-prod-eus-001</b><i>Log Analytics workspace shared by all apps</i></div>
+    </div>
+  </div>
+  <div class="panel open">
+    <h2 style="color:#b45309">Confirm with IT before build</h2>
+    <ul>
+      <li>Workload token <code>cda</code> is a placeholder</li>
+      <li>AI Search, AI Speech and Foundry are not in the JB naming table or private DNS zone list</li>
+      <li>AKS and PostgreSQL are not in the standard, so this design uses App Service and Azure SQL</li>
+    </ul>
+  </div>
+</div>
+
+<div class="gov">
+  <h2>Governance &amp; Human Oversight</h2>
+  <ul>
+    <li>Organizational, clinical, privacy, security &amp; legal review before go-live</li>
+    <li>Signed BAA with every vendor handling client data</li>
+    <li>HIPAA safeguards · role-based access · JB Azure standards</li>
+    <li>Clinician reviews, edits and approves every note</li>
+    <li>AI never invents clinical facts; gaps flagged for the clinician</li>
+    <li>Audit trail of every draft, edit and approval</li>
+  </ul>
+</div>
+
+<svg id="arrows" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1e3a5f"/>
+    </marker>
+  </defs>
+</svg>
+
+<script>
+(function () {
+  var page = document.querySelector('.page');
+  var svg = document.getElementById('arrows');
+  var NS = 'http://www.w3.org/2000/svg';
+  function size() { svg.setAttribute('width', page.offsetWidth); svg.setAttribute('height', page.offsetHeight); }
+  function R(id) {
+    var r = document.getElementById(id).getBoundingClientRect(), p = page.getBoundingClientRect();
+    return { l: r.left - p.left, r: r.right - p.left, t: r.top - p.top, b: r.bottom - p.top, w: r.width, h: r.height };
+  }
+  function pt(id, s, f) {
+    var r = R(id); f = (f === undefined) ? 0.5 : f;
+    if (s === 'l') return { x: r.l, y: r.t + r.h * f, o: 'h' };
+    if (s === 'r') return { x: r.r, y: r.t + r.h * f, o: 'h' };
+    if (s === 't') return { x: r.l + r.w * f, y: r.t, o: 'v' };
+    return { x: r.l + r.w * f, y: r.b, o: 'v' };
+  }
+  function A(from, fs, to, ts, o) {
+    o = o || {};
+    var a = pt(from, fs, o.ff), b = pt(to, ts, o.tf), pts;
+    if (a.o === 'h' && b.o === 'h') {
+      var xm = (o.mid !== undefined) ? o.mid : (a.x + b.x) / 2;
+      pts = (Math.abs(a.y - b.y) < 2) ? [a, b] : [a, { x: xm, y: a.y }, { x: xm, y: b.y }, b];
+    } else if (a.o === 'v' && b.o === 'v') {
+      var ym = (o.bus !== undefined) ? a.y + (b.y - a.y) * o.bus : (a.y + b.y) / 2;
+      pts = (Math.abs(a.x - b.x) < 2) ? [a, b] : [a, { x: a.x, y: ym }, { x: b.x, y: ym }, b];
+    } else if (a.o === 'h') {
+      pts = [a, { x: b.x, y: a.y }, b];
+    } else {
+      pts = [a, { x: a.x, y: b.y }, b];
+    }
+    var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' ');
+    var path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', d); path.setAttribute('fill', 'none'); path.setAttribute('stroke', '#1e3a5f');
+    path.setAttribute('stroke-width', '2.4'); path.setAttribute('stroke-linejoin', 'round');
+    if (o.dash) path.setAttribute('stroke-dasharray', '7 5');
+    path.setAttribute('marker-end', 'url(#ah)');
+    if (o.both) path.setAttribute('marker-start', 'url(#ah)');
+    svg.appendChild(path);
+    if (o.label) {
+      var best = 0, bi = 0;
+      for (var i = 0; i < pts.length - 1; i++) {
+        var len = Math.abs(pts[i + 1].x - pts[i].x) + Math.abs(pts[i + 1].y - pts[i].y);
+        if (len > best) { best = len; bi = i; }
+      }
+      var lx = (pts[bi].x + pts[bi + 1].x) / 2 + (o.dx || 0), ly = (pts[bi].y + pts[bi + 1].y) / 2 + (o.dy || 0);
+      var t = document.createElementNS(NS, 'text');
+      t.textContent = o.label; t.setAttribute('x', lx); t.setAttribute('y', ly + 4.5);
+      t.setAttribute('text-anchor', 'middle'); t.setAttribute('font-family', 'Segoe UI, Arial, sans-serif');
+      t.setAttribute('font-size', '12.5'); t.setAttribute('font-weight', '700'); t.setAttribute('fill', '#1e3a5f');
+      svg.appendChild(t);
+      var bb = t.getBBox();
+      var bg = document.createElementNS(NS, 'rect');
+      bg.setAttribute('x', bb.x - 4); bg.setAttribute('y', bb.y - 1); bg.setAttribute('width', bb.width + 8); bg.setAttribute('height', bb.height + 2);
+      bg.setAttribute('rx', 4); bg.setAttribute('fill', '#ffffff'); bg.setAttribute('stroke', '#cbd5e1');
+      svg.insertBefore(bg, t);
+    }
+  }
+  function draw() {
+    size();
+    // entry path
+    A('clin', 'r', 'fd', 'l', { label: 'HTTPS' });
+    A('fd', 'b', 'apim', 't');
+    A('ent', 't', 'apim', 'b', { dash: true, label: 'token + role', dx: 92 });
+    A('apim', 'r', 'orch', 'l', { label: 'private network', mid: R('appP').l - 45 });
+    // external services
+    var oR = R('orch'), sR = R('speech');
+    var sf = Math.min(0.85, Math.max(0.15, (sR.t + sR.h / 2 - oR.t) / oR.h));
+    A('orch', 'r', 'speech', 'l', { ff: sf, both: true, label: 'audio / text', mid: R('appP').r + 45 });
+    A('ehr', 'l', 'orch', 'r', { tf: 0.9, label: 'client, session, plan', mid: R('appP').r + 22, dy: 40, dx: -14 });
+    A('gw', 'r', 'claude', 'l', { label: 'JB-approved route', mid: R('appP').r + 68 });
+    // write path
+    A('orch', 'b', 'ctx', 't', { ff: 0.25 });
+    A('ctx', 'b', 'drf', 't');
+    A('drf', 'b', 'grd', 't');
+    A('grd', 'r', 're', 'l', { label: 'draft' });
+    // assess path (bottom to top)
+    A('re', 't', 'cc', 'b');
+    A('cc', 't', 'fu', 'b');
+    A('fu', 'l', 'drf', 'r', { dash: true, label: 'answers re-draft', dy: -6 });
+    // data and operations
+    A('appP', 'b', 'dataP', 't', { ff: 0.14, tf: 0.9, both: true, bus: 0.35, label: 'notes · audit · retrieval · rules' });
+    A('opsP', 't', 'appP', 'b', { dash: true, ff: 0.2, tf: 0.82, bus: 0.55, label: 'secrets · telemetry · deploys' });
+    // pipeline
+    A('psrc', 'l', 'dblob', 'r', { label: 'files' });
+    A('ping', 'l', 'dsearch', 'r', { label: 'index' });
+    A('pauth', 'l', 'dgit', 'r', { label: 'rules' });
+    A('psrc', 'b', 'ping', 't');
+  }
+  window.addEventListener('load', function () { setTimeout(draw, 150); });
+})();
+</script>
+</div></body></html>

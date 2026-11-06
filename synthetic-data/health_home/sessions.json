@@ -1,0 +1,10 @@
+[
+  {
+    "client_external_id": "HH-C001",
+    "scheduled_at": "2026-11-02T17:00:00+00:00",
+    "service_type": "Care Coordination Contact",
+    "modality": "Phone",
+    "duration_minutes": 20,
+    "goal_ids": ["G1"]
+  }
+]

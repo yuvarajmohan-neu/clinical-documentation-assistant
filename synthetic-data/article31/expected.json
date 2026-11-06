@@ -1,0 +1,15 @@
+{
+  "_note": "Placeholder rule ids. P4 owns rules/article31.yaml (team-responsibility-split.md). Reconcile these ids against the real rule set once it exists, then drop this _note field.",
+  "pass_article31_01": {
+    "expected_status": "Meets standards",
+    "must_not_trigger": []
+  },
+  "fail_article31_01": {
+    "expected_status": "Needs attention",
+    "must_trigger": [
+      "A31-RESPONSE-001",
+      "A31-SIGN-002",
+      "A31-TIMELY-003"
+    ]
+  }
+}

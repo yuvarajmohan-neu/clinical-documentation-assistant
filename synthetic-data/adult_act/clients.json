@@ -1,0 +1,16 @@
+[
+  {
+    "external_id": "AACT-C001",
+    "name": "Taylor Nguyen (synthetic)",
+    "dob": "1978-11-02",
+    "diagnosis_summary": "Schizoaffective Disorder, bipolar type (F25.0) — synthetic/role-played case for demo purposes only.",
+    "goals": [
+      {
+        "goal_id": "G1",
+        "description": "Maintain stable housing and attend medication management appointments",
+        "target_date": "2027-03-01",
+        "status": "active"
+      }
+    ]
+  }
+]
