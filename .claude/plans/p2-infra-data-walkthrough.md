@@ -1,27 +1,27 @@
-# P2 walkthrough — what the Keycloak/DB/Audit/synthetic-data owner builds
+# P2 walkthrough — what the DB/Auth/Audit/synthetic-data owner builds
 
 ## Context
 Team-lead briefing on P2's scope, from `.claude/plans/team-responsibility-split.md`, `docs/architecture.md` (§2.4, 2.6–2.11, 3, 7) and the azure-standards skill. Nothing is built yet: the repo has only docs, diagrams and skills (plus the frontend scaffold P1 already started). No code changes are proposed here. Mirrors the structure of `p1-react-walkthrough.md`.
 
 ## 1. P2's deliverables
-1. **Infra** (`infra/docker-compose.yml`, `infra/keycloak/realm-jb-demo.json`) — Postgres+pgvector and Keycloak, wired together.
-2. **Auth provider** (`backend/providers/auth/`) — the `oidc` and `dev` adapters behind `AuthProvider`.
-3. **Database** (`backend/db/`) — SQLModel schema, migrations, repository layer, seed script.
-4. **Audit log** (`backend/providers/audit/`) — hash-chained, append-only, with verify.
-5. **Synthetic data** (`synthetic-data/<program>/`) — clients, sessions, pass/fail notes, `expected.json` for all 5 programs.
-6. **Production notes** for `docs/submission/` — HIPAA, BAA, RBAC, audit, Azure mapping (describe only).
+1. **Database** (`backend/db/`) — native Postgres (no container runtime required), SQLModel schema, migrations, repository layer, seed script.
+2. **Auth provider** (`backend/providers/auth/`) — the `dev` adapter (default) behind `AuthProvider`; the `oidc`/Keycloak adapter is a stretch goal, built only if time allows.
+3. **Audit log** (`backend/providers/audit/`) — hash-chained, append-only, with verify.
+4. **Synthetic data** (`synthetic-data/<program>/`) — clients, sessions, pass/fail notes, `expected.json` for all 5 programs.
+5. **Production notes** for `docs/submission/` — HIPAA, BAA, RBAC, audit, Azure mapping (describe only).
+6. **Stretch, optional:** `infra/docker-compose.yml` (already in the repo) + `infra/keycloak/realm-jb-demo.json`, for anyone who wants to run Postgres/Keycloak via Docker or Podman, or demo the real `oidc` adapter.
 
 P2 is the one role that touches all four layers underneath the orchestrator (auth, data, audit, demo content) rather than one vertical slice — so the main risk isn't depth, it's sequencing: everyone else is waiting on pieces of this.
 
 ## 2. The four pieces, in build order
 
-### 2a. Infra (`infra/docker-compose.yml`)
-- Two services at minimum: `postgres` (image `pgvector/pgvector:pg16`, port 5432) and `keycloak` (`quay.io/keycloak/keycloak`, dev mode, realm import, port 8080). Healthchecks and named volumes so `docker compose up` is the one command that starts the whole local stack (CLAUDE.md's `infra/docker-compose.yml` requirement).
-- Keycloak imports `infra/keycloak/realm-jb-demo.json` on startup — this file is committed, so the realm is reproducible, not clicked together by hand.
-- Optional/stretch services other people might add later for provider-swap demos (`qdrant`, `whisper`) don't belong to P2 — only Postgres and Keycloak are P2's.
+### 2a. Database setup (native Postgres)
+- Install Postgres locally (or use a Postgres the developer already has, or a managed/cloud instance) with the `pgvector` extension enabled. No container runtime is required to run the prototype.
+- Stretch, optional: `infra/docker-compose.yml` still exists for anyone who'd rather run Postgres (and, if built, Keycloak) via Docker or Podman — two services, `postgres` (image `pgvector/pgvector:pg16`, port 5432) and `keycloak` (`quay.io/keycloak/keycloak`, dev mode, realm import, port 8080), with healthchecks and named volumes. This is optional convenience, not the required path.
+- Other optional/stretch services (`qdrant`, `whisper`) for provider-swap demos don't belong to P2 either way.
 
-### 2b. Keycloak realm (`infra/keycloak/realm-jb-demo.json`)
-This is the mechanism behind CLAUDE.md requirement "the program is set by their role":
+### 2b. Keycloak realm (`infra/keycloak/realm-jb-demo.json`) — stretch goal only
+Build this only after the `dev` auth stub (2c) is working and if time allows. It's the mechanism behind CLAUDE.md requirement "the program is set by their role" for anyone who wants the real OIDC flow instead of the dev stub:
 - **Clients:** `cda-web` (public, PKCE — for the React app) and `cda-api` (the token audience the backend validates against).
 - **Roles:** `clinician`, `supervisor`, plus one `program:*` role per program — `program:adult_act`, `program:youth_act`, `program:health_home`, `program:apt_treatment`, `program:article31`. A role claim mapper puts these into the token (Keycloak's default location is `realm_access.roles`).
 - **Demo users (synthetic only, per CLAUDE.md's non-negotiable rule):**
@@ -29,16 +29,16 @@ This is the mechanism behind CLAUDE.md requirement "the program is set by their 
   - `act.clinician` — clinician, Adult **and** Youth ACT → gets a picker between just those two.
   - `supervisor` — all programs, used for the "supervisor can't approve a clinician's note" access test and the Critical-override story.
   - Passwords go in `.env.example` as obviously-fake demo values, never in the realm JSON itself if that file is meant to be widely shared — confirm with the team whether demo passwords live in the realm export or purely in `.env.example`.
-- This realm is the thing P1 logs into and P3's `oidc` auth dependency validates against — both are blocked until this file exists, even in a minimal form.
+- If this stretch item is built, this realm is what P1 could optionally log into and P3's `oidc` auth dependency validates against — but nobody is blocked waiting on it, since `AUTH_PROVIDER=dev` is the default path.
 
 ### 2c. Auth provider (`backend/providers/auth/`)
 Implements the `AuthProvider` interface from the shared contracts (`backend/providers/types.py` → `Principal{user_id, name, roles, programs}`):
 - `base.py` — the Protocol: `verify(token) -> Principal`.
-- `oidc.py` — fetches Keycloak's JWKS, checks `iss`/`aud`/expiry, maps the role claim to `Principal.programs` (the `program:*` roles) and `Principal.roles` (`clinician`/`supervisor`).
-- `dev.py` — `AUTH_PROVIDER=dev`, an offline fallback that returns a fixed demo `Principal` with no network call at all. This exists specifically so the live demo survives if Keycloak misbehaves, and so P1/P3 can build before the realm is ready.
+- `dev.py` — `AUTH_PROVIDER=dev`, the **default** offline auth path: returns a fixed demo `Principal` with no network call at all. Build this first — it's what everyone (P1, P3) builds and demos against. This exists so the whole prototype runs with no identity server, no container runtime, and survives the live demo regardless of anything else.
 - A FastAPI dependency (`current_principal`) that routers use, plus `require_program(p)` / `require_role("clinician")` guards — these are what make "only a clinician can approve their own note" and the 403-for-wrong-program access test true.
-- **Forward-looking constraint (architecture §2.8, §7):** switching to Entra ID later is `.env`-only on the backend (`OIDC_ISSUER`, `OIDC_AUDIENCE`, `OIDC_ROLE_CLAIM`, plus checking the `tid` claim for the JB tenant) — so the `oidc` adapter should be written generically against those four settings now, not hard-coded to Keycloak's claim shape, or the "no business-logic change" promise breaks later.
-- Contract tests in `tests/providers/test_auth_contract.py` — the same test suite should pass against both `oidc` and `dev`.
+- **Stretch, only if time allows:** `oidc.py` — fetches Keycloak's JWKS, checks `iss`/`aud`/expiry, maps the role claim to `Principal.programs` (the `program:*` roles) and `Principal.roles` (`clinician`/`supervisor`).
+- **Forward-looking constraint (architecture §2.8, §7):** switching to Entra ID later is `.env`-only on the backend (`OIDC_ISSUER`, `OIDC_AUDIENCE`, `OIDC_ROLE_CLAIM`, plus checking the `tid` claim for the JB tenant) — so if the `oidc` adapter is built, it should be written generically against those four settings, not hard-coded to Keycloak's claim shape, or the "no business-logic change" promise breaks later.
+- Contract tests in `tests/providers/test_auth_contract.py` — the same test suite should pass against `dev`, and against `oidc` too if it's built.
 
 ### 2d. Database (`backend/db/`)
 SQLModel models + migrations for the schema every other service reads/writes:
@@ -72,14 +72,14 @@ For all 5 programs (Adult ACT, Youth ACT, Health Home, Apartment Treatment, Arti
 - **`note_versions` rows are immutable** — an approve doesn't rewrite history; later changes are new versions/addenda with their own audit entry (architecture §2.10).
 
 ## 4. Dependencies and ordering for P2
-- **Nobody is upstream of P2 for infra/auth/DB** — P1, P3, and P4 are all waiting on pieces of P2's work, which makes this the component to start immediately, in parallel with P4's regulation collection (the other named critical path).
+- **Nobody is upstream of P2 for auth/DB** — P1, P3, and P4 are all waiting on pieces of P2's work, which makes this the component to start immediately, in parallel with P4's regulation collection (the other named critical path).
 - Order that unblocks the most people fastest:
-  1. `docker-compose.yml` with Postgres + Keycloak (unblocks everyone running the stack locally).
+  1. Native Postgres set up locally, `pgvector` enabled (unblocks everyone running the stack — no container runtime needed).
   2. DB schema (shared contract #4) — needs sign-off from all four people, since P3's repos, P4's `kb_chunks`, and P1's version drawer all read it.
-  3. `AUTH_PROVIDER=dev` stub first (unblocks P1 and P3 immediately without waiting on a working realm), then the real Keycloak realm + `oidc` adapter.
+  3. `AUTH_PROVIDER=dev` stub (unblocks P1 and P3 immediately, and is the path the team actually demos with); the Keycloak realm + `oidc` adapter are stretch goals, built only after this and only if time allows.
   4. Audit log (needed before P3 can wire `approve`/`edit` events, but not before P1/P3 can start building against mocks).
   5. Synthetic data: clients/sessions/pass-notes early; fail-notes + `expected.json` after P4 has at least Article 31's rules.
-- **Depends on:** the shared DB schema sign-off (contract #4) and P4's rule ids (for fail notes). **Delivers to:** P1 (realm + demo users, synthetic sessions for the UI), P3 (repository layer, `Principal`, audit events), P4 (`kb_chunks`/`kb_documents` tables), P1 again (synthetic data doubles as evaluation fixtures).
+- **Depends on:** the shared DB schema sign-off (contract #4) and P4's rule ids (for fail notes). **Delivers to:** P1 (dev-stub demo users, synthetic sessions for the UI; realm + Keycloak login if the stretch is built), P3 (repository layer, `Principal`, audit events), P4 (`kb_chunks`/`kb_documents` tables), P1 again (synthetic data doubles as evaluation fixtures).
 
 ## 5. Production notes (`docs/submission/`, describe-only)
 CLAUDE.md req 24 and architecture §2.11 are explicit that this is description, not implementation, for the hackathon:
@@ -89,10 +89,10 @@ CLAUDE.md req 24 and architecture §2.11 are explicit that this is description, 
 
 ## 6. Risks and open questions to raise with the team
 1. **Shared-load risk (explicit in the team-split doc):** P2's `kb_chunks` table shape is a dependency for P4's search work, and if P2 gets overloaded, rules-engine code was proposed to move from P4 to P2 instead. Decide early which way that goes — it changes P2's scope materially.
-2. **Realm password storage:** confirm whether demo user passwords live inside the committed `realm-jb-demo.json` or only in `.env.example` — committing them in the realm file is lower friction for `docker compose up` but is still a password-shaped string in git history, even if fake.
+2. **Realm password storage (only relevant if the Keycloak stretch is built):** confirm whether demo user passwords live inside the committed `realm-jb-demo.json` or only in `.env.example` — committing them in the realm file is lower friction for `docker compose up` but is still a password-shaped string in git history, even if fake.
 3. **Fail-note timing:** fail notes and `expected.json` are blocked on P4's rule ids per program. If P4 falls behind on programs 2–5, P2's synthetic-data deliverable for those programs stalls too — worth tracking alongside the "Article 31 first" build order rather than assuming it happens automatically.
 4. **DB permission enforcement:** the audit tamper demo only proves what it claims to prove if the app's Postgres role genuinely lacks UPDATE/DELETE on `audit_log` at the grant level — worth a line item in `scripts/evaluate.py` or a dedicated test, not just manual confirmation.
 5. **`AUTH_PROVIDER=dev` scope creep:** make sure the dev stub is clearly demo-only (e.g., refuses to run if an env flag says "production") so it can't accidentally end up as the auth path anywhere beyond the hackathon demo.
 
 ## Verification (when built)
-`docker compose -f infra/docker-compose.yml up` starts Postgres and Keycloak; logging in as `art31.clinician` sets the Article 31 program with no picker; `art31.clinician` gets 403 calling `/draft` for Adult ACT; `supervisor` cannot approve a clinician's note; tampering with an `audit_log` row makes `verify_chain()`/`GET /audit/verify` fail; `scripts/evaluate.py` shows 0 Critical issues on every `pass_*` note and the expected rule ids on every `fail_*` note across all 5 programs; no secrets are committed (`grep` check); switching `AUTH_PROVIDER` from `oidc` to `dev` leaves the evaluation matrix unchanged.
+Native Postgres running locally; `AUTH_PROVIDER=dev` selecting `art31.clinician` sets the Article 31 program with no picker; `art31.clinician` gets 403 calling `/draft` for Adult ACT; `supervisor` cannot approve a clinician's note; tampering with an `audit_log` row makes `verify_chain()`/`GET /audit/verify` fail; `scripts/evaluate.py` shows 0 Critical issues on every `pass_*` note and the expected rule ids on every `fail_*` note across all 5 programs; no secrets are committed (`grep` check). If the Keycloak stretch is built: `docker compose -f infra/docker-compose.yml up` starts Postgres and Keycloak, logging in as `art31.clinician` behaves the same way, and switching `AUTH_PROVIDER` from `dev` to `oidc` leaves the evaluation matrix unchanged.

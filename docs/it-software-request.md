@@ -11,23 +11,27 @@ employee data touches any of the software or services listed below.
 |---|---|---|
 | Python 3.11+ | Backend runtime (FastAPI) | PSF |
 | Node.js 20 LTS + npm | Frontend runtime (React/Vite) | MIT |
-| Docker Desktop (or compatible container runtime) | Runs local Postgres + Keycloak via `docker-compose` | Docker Subscription Service Agreement — confirm which Docker Desktop license tier JB holds |
+| PostgreSQL 16 (+ pgvector extension), native install | Data store | PostgreSQL License |
 | Git | Version control | GPLv2 |
 | VS Code / Claude Code | IDE | Free / per existing Anthropic agreement |
+
+No container runtime (Docker Desktop, Podman, etc.) is required to run the
+prototype. Sign-in defaults to an offline `AUTH_PROVIDER=dev` stub (a fixed
+synthetic demo user, no network call), so Keycloak is not needed to stand up
+or demo the app.
 
 ## 2. Open-source components (pulled via package managers — need registry/proxy access, not accounts)
 | Component | Source | License | Notes |
 |---|---|---|---|
-| PostgreSQL 16 + pgvector | Docker Hub image `pgvector/pgvector:pg16` | PostgreSQL License | Data store |
-| Keycloak | Docker image `quay.io/keycloak/keycloak` | Apache-2.0 | Local sign-in/roles only; **not** the production identity provider (that's Entra ID) |
 | FastAPI, SQLModel, Pydantic, PyJWT, psycopg | PyPI | MIT/BSD | Backend libraries |
 | React, Vite, TypeScript, react-oidc-context, oidc-client-ts | npm | MIT | Frontend libraries |
 | Docling | PyPI | MIT | Document parsing for the regulation library |
 | sentence-transformers + `BAAI/bge-small-en-v1.5` | PyPI + Hugging Face Hub | Apache-2.0 / MIT | Embeddings, runs locally on CPU — needs outbound access to huggingface.co once to download ~130MB of model weights, no account required, ungated model |
-| Qdrant (optional, provider-swap demo only) | Docker image | Apache-2.0 | Stretch goal only |
+| Keycloak (optional, stretch goal only) | quay.io image, run via Docker/Podman if a contributor picks this up | Apache-2.0 | Only needed to demo the real `oidc` adapter instead of the `dev` auth stub; not required to run or demo the prototype |
+| Qdrant (optional, provider-swap demo only) | Container image, source TBD if picked up | Apache-2.0 | Stretch goal only |
 | faster-whisper (optional, offline speech fallback) | PyPI | MIT | Only needed if Web Speech API is disallowed |
 
-**Ask of IT:** confirm PyPI, npm, Docker Hub, quay.io, and huggingface.co are reachable from dev machines (or routed through an approved proxy/mirror).
+**Ask of IT:** confirm PyPI, npm, and huggingface.co are reachable from dev machines (or routed through an approved proxy/mirror).
 
 ## 3. Vendor/cloud services needing explicit approval
 | Service | What it's for | Why IT needs to weigh in |

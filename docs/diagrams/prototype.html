@@ -51,7 +51,7 @@ header .sub { max-width: 1150px; }
 <div class="row1">
   <div class="panel web" id="webP">
     <h2>Web App <small>React · JB brand · 12h ET · 2 pages</small></h2>
-    <div class="card sec" id="w1"><b>Sign in (OIDC)</b><i>Keycloak login · token on every call</i></div>
+    <div class="card sec" id="w1"><b>Sign in</b><i>Dev stub by default · token on every call · Keycloak/OIDC optional</i></div>
     <div class="card human" id="w2"><b>Program &amp; session picker</b><i>Programs allowed by role · synthetic sessions</i></div>
     <div class="card plain" id="w3"><b>Input · two pages</b><i><u>Write a note</u>: type · dictate (browser speech-to-text)<br><u>Check a note</u>: paste a finished note, assess only</i></div>
     <div class="card plain" id="w4"><b>Shared review screen · draft view</b><i>Program format, SOAP where used<br>Missing items shown as NOT PROVIDED</i></div>
@@ -84,7 +84,7 @@ header .sub { max-width: 1150px; }
     <div class="wrapbox" id="wrap">
       <div class="lbl">Provider wrappers <span>· 4 of 10 shown (see Provider Wrappers diagram) · built for real: Claude, Auth, Search, Audit</span></div>
       <div class="g">
-        <div class="card sec" id="wAuth"><b>Auth</b><i>Verify token · program roles<br>oidc → Keycloak / Entra</i></div>
+        <div class="card sec" id="wAuth"><b>Auth</b><i>Verify token · program roles<br>dev stub → oidc (Keycloak / Entra) optional</i></div>
         <div class="card rules" id="wSearch"><b>Retriever</b><i>Hybrid keyword + vector<br>pgvector / Qdrant / AI Search</i></div>
         <div class="card ai" id="wLlm"><b>Claude client</b><i>Fixed output schema<br>Anthropic / Azure Foundry</i></div>
         <div class="card sec" id="wAudit"><b>Audit logger</b><i>Hash-chained, versions used<br>Postgres / Azure</i></div>
@@ -96,7 +96,7 @@ header .sub { max-width: 1150px; }
 
   <div class="ext">
     <div class="stack">
-      <div class="panel sec-bg" id="kc"><h2>Keycloak</h2><div style="font-size:14px">OIDC sign-in<br>clinician / supervisor<br>+ program roles</div></div>
+      <div class="panel sec-bg" id="kc"><h2>Sign-in</h2><div style="font-size:14px">Dev stub (default)<br>clinician / supervisor<br>+ program roles · Keycloak optional</div></div>
       <div class="panel ai-bg" id="cl"><h2>Claude</h2><div style="font-size:14px">Anthropic API or<br>Azure Foundry<br>(set in config)</div></div>
       <div class="panel sec-bg" id="env"><h2>.env</h2><div style="font-size:14px"><code>*_PROVIDER</code> settings<br>+ keys, never in code</div></div>
     </div>
@@ -120,7 +120,7 @@ header .sub { max-width: 1150px; }
 <div class="flow">
   <h2>How a note moves through the system</h2>
   <div class="steps">
-    <div class="step human"><span class="n">1</span><b>Sign in + select</b>Role sets program; pick synthetic session</div><span class="chev">›</span>
+    <div class="step human"><span class="n">1</span><b>Sign in + select</b>Dev-stub role sets program; pick synthetic session</div><span class="chev">›</span>
     <div class="step human"><span class="n">2</span><b>Input</b>Write page: type or dictate. Check page: paste a note</div><span class="chev">›</span>
     <div class="step"><span class="n">3</span><b>Draft</b>Write page only. Pre-filled, goal-linked, grounded in retrieved regulations</div><span class="chev">›</span>
     <div class="step"><span class="n">4</span><b>Guard</b>Anything not provided → blank + flagged</div><span class="chev">›</span>

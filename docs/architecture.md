@@ -3,8 +3,8 @@
 **Decisions:**
 - Python (FastAPI) + React (Vite).
 - The prototype runs the open-source versions of the production building blocks:
-  - **Keycloak** for sign-in and roles.
-  - **Postgres + pgvector** for data and hybrid search.
+  - **`AUTH_PROVIDER=dev`** (a fixed offline demo user) for sign-in by default; no container runtime required. The real `oidc` adapter against **Keycloak** is an optional stretch path, not needed to run or demo the prototype.
+  - **Postgres + pgvector**, installed natively (or any Postgres the dev already has, or a managed/cloud instance), for data and hybrid search.
   - **Docling** for document parsing.
   - **bge** embeddings, run locally.
 - **Every external capability sits behind a provider wrapper.** Switching to Azure (Entra ID, AI Search, Blob, Key Vault, AI Speech) or to another vendor is a change to `.env` plus one new adapter file. No business-logic changes. See §2.7.
@@ -38,13 +38,13 @@ flowchart LR
   CLIN["Clinician"]:::human
   WEB["Web app · React + JB brand<br/>Write a note + Check a note pages"]
   API["Backend API<br/>FastAPI"]
-  KC["Keycloak<br/>sign-in + roles"]:::sec
+  AUTH["Sign-in<br/>dev stub (default)<br/>Keycloak/OIDC optional"]:::sec
   KB[("Knowledge base<br/>NYS regulations + rules<br/>versioned")]:::rules
   CLAUDE["Claude<br/>draft + content checks"]:::ai
   DB[("Postgres<br/>notes, versions, audit log")]:::sec
 
   CLIN --> WEB --> API
-  WEB -.->|"sign in"| KC
+  WEB -.->|"sign in"| AUTH
   API -->|"search"| KB
   API -->|"prompts + cited passages"| CLAUDE
   API --> DB
@@ -132,7 +132,7 @@ Production notes, kept out of the picture:
 | Brief requirement | Prototype (A1–A3, plus §2) | Diagram B |
 |---|---|---|
 | Program frameworks, every rule cites source | Rule sets + Regulation library | Rule authoring → Git repo; Ingest → AI Search |
-| Program chosen by clinician or role | Keycloak program roles → Program selector | Entra ID role |
+| Program chosen by clinician or role | `dev` stub program roles (Keycloak program roles if the oidc stretch is picked up) → Program selector | Entra ID role |
 | 5 Dictate / type / paste | Write page (type, dictate) + Web Speech; Check page (paste) | Web app + Azure AI Speech |
 | 6 Draft in program format (SOAP) | Drafter | Drafter |
 | 7 Pre-fill session details | Session context ← Synthetic records | Session context ← EHR |
@@ -151,7 +151,7 @@ Production notes, kept out of the picture:
 | 21 Fixed output schema | Claude client wrapper | Claude gateway (schema validation) |
 | 22 Versioned prompts, rules, docs | git + manifest + audit records versions | Git repo + versioned Blob + CI |
 | 23 Synthetic pass/fail demo | Demo notes + evaluation script | CI evaluation gate |
-| 24 HIPAA, BAA, EHR, audit | Keycloak RBAC + hash-chained audit log (stand-ins) | BAAs, EHR, immutable audit log, Key Vault, RBAC |
+| 24 HIPAA, BAA, EHR, audit | `dev`-stub RBAC (Keycloak RBAC if oidc stretch is picked up) + hash-chained audit log (stand-ins) | BAAs, EHR, immutable audit log, Key Vault, RBAC |
 | Switch providers later | Provider registry (§2.7) | Same interfaces, Azure adapters |
 | No secrets in code | .env | Key Vault |
 
@@ -179,9 +179,9 @@ Production notes, kept out of the picture:
 │                     speech · secrets · audit   (all chosen in .env)      │
 └──────────────────────────────────────────────────────────────────────────┘
         │                 │                    │                  │
-  knowledge-base/    rules/<program>.yaml   synthetic-data/   Postgres + pgvector      Keycloak (OIDC)
-  (NYS docs) → Docling → bge → index        (clients, sessions,  (notes, versions,     sign-in, roles
-                      (versioned)            plans, notes)        audit, KB vectors)
+  knowledge-base/    rules/<program>.yaml   synthetic-data/   Postgres + pgvector      Sign-in: dev stub
+  (NYS docs) → Docling → bge → index        (clients, sessions,  (notes, versions,     (default); Keycloak
+                      (versioned)            plans, notes)        audit, KB vectors)    (OIDC) optional
 ```
 
 ## 2. Components
@@ -246,11 +246,12 @@ The pipeline runs offline with `python -m backend.kb.ingest`. It is re-run whene
 | `POST /notes/{id}/approve` | Approve. Blocked while any Critical issue is open; the clinician sees the status and confirms | 15–16 |
 
 - Overall status rule: any open Critical issue → **Needs attention**. No Critical issues but some Warnings → **Meets standards with warnings**. Otherwise → **Meets standards**.
-- **Postgres** (SQLModel; the `pgvector/pgvector:pg16` image) stores `notes`, `note_versions`, the KB chunks, and an append-only `audit_log` with actor, action, timestamp and versions.
+- **Postgres** (SQLModel; a native local install or managed instance with the `pgvector` extension enabled) stores `notes`, `note_versions`, the KB chunks, and an append-only `audit_log` with actor, action, timestamp and versions.
   - Each audit row stores a hash of the previous row, so tampering is visible.
   - This is a stand-in for the immutable production audit log (req 24).
   - The `actor` value comes from the signed-in user's token, not from the request body.
 - Every endpoint except `/health` requires a valid token. The program in the request must be one of the user's program roles (see §2.8). All timestamps are stored in UTC and shown as `M/D/YYYY h:mm AM/PM ET` using `zoneinfo("America/New_York")`.
+- **Postgres is installed natively** (or via any Postgres the developer already has, or a managed/cloud instance) with the `pgvector` extension enabled; no container runtime is required to run the prototype.
 
 ### 2.5 Frontend (reqs 17, 18)
 - **Two pages** under one app shell (header, logo, program selector, "SYNTHETIC DATA – DEMO ONLY" badge). They are separate pages, not a mode toggle, so a clinician never has to wonder which mode they are in.
@@ -286,7 +287,7 @@ Business code (services, rule engine, API) depends only on **interfaces** in `ba
 | Capability | Interface (methods) | Prototype adapter (open source) | Production / alternative adapters | Setting |
 |---|---|---|---|---|
 | Claude | `LLMProvider.complete_structured(prompt_id, vars, schema)` | `anthropic` (direct API) | `azure_foundry` | `LLM_PROVIDER` |
-| Identity | `AuthProvider.verify(token) → Principal{user_id, name, roles, programs}` | `oidc` → **Keycloak** | `oidc` → Entra ID (same code, different issuer); `dev` stub for offline demos | `AUTH_PROVIDER`, `OIDC_ISSUER`, `OIDC_AUDIENCE`, `OIDC_ROLE_CLAIM` |
+| Identity | `AuthProvider.verify(token) → Principal{user_id, name, roles, programs}` | `dev` stub (default, offline, fixed demo user) | `oidc` → **Keycloak** (optional stretch) or Entra ID (same code, different issuer) | `AUTH_PROVIDER`, `OIDC_ISSUER`, `OIDC_AUDIENCE`, `OIDC_ROLE_CLAIM` |
 | Document parsing | `DocumentParser.parse(path) → Section[]` | `docling` | `pypdf`, Azure AI Document Intelligence | `PARSER_PROVIDER` |
 | Embeddings | `Embedder.embed(texts) → vectors` | `local` (bge-small via sentence-transformers) | Azure OpenAI or another BAA-covered vendor | `EMBEDDINGS_PROVIDER`, `EMBEDDINGS_MODEL` |
 | Search index | `SearchProvider.upsert(chunks)`, `.search(query, programs, k) → Passage[]` | `pgvector` (hybrid with Postgres full-text search) | `qdrant`, `azure_ai_search` | `SEARCH_PROVIDER` |
@@ -311,43 +312,38 @@ def search_provider() -> SearchProvider:
 - **Contract tests.** `tests/providers/test_<capability>_contract.py` runs the same tests against every adapter that is configured, so a new provider is proven to behave the same before anyone switches to it.
 - **Return types are ours.** Adapters return project types (`Passage`, `Principal`, `Issue`), never vendor SDK objects. This keeps vendor types out of business code.
 
-### 2.8 Identity and access in the prototype (Keycloak)
-- `docker compose up` starts Keycloak and imports `infra/keycloak/realm-jb-demo.json`, which is committed and contains synthetic users only.
-- **Clients:**
-  - `cda-web`: a public client using PKCE.
-  - `cda-api`: the token audience.
-- **Roles:**
-  - `clinician` and `supervisor`, plus one program role per program: `program:adult_act`, `program:youth_act`, `program:health_home`, `program:apt_treatment`, `program:article31`.
-  - **This is how "the program is set by role" is met.** A user with exactly one program role skips the program picker.
-- **Demo users:**
-  - `art31.clinician`: clinician, Article 31.
-  - `act.clinician`: clinician, Adult and Youth ACT.
-  - `supervisor`: supervisor, all programs.
-  - Passwords live in `.env.example` as obviously fake demo values.
-- **Backend:**
-  - The `oidc` adapter checks the JWT against the issuer's public keys (JWKS) and maps the role claim to a `Principal`.
-  - FastAPI dependencies `require_program(p)` and `require_role("clinician")` protect the routes.
-  - Only a `clinician` can approve their own note.
-- **Frontend:** `react-oidc-context` (`oidc-client-ts`) sends the user to the login page and attaches the token to every API call.
-- **Switching to Entra ID:** on the backend, change `OIDC_ISSUER`, `OIDC_AUDIENCE` and `OIDC_ROLE_CLAIM` (Keycloak uses `realm_access.roles`, Entra uses `roles`), and set the JB tenant id so the adapter also checks the `tid` claim. The frontend library changes from `react-oidc-context` to MSAL, because the JB standard requires MSAL for single-page apps (see §7).
-- **Fallback:** `AUTH_PROVIDER=dev` uses a fixed demo user, in case Keycloak fails during the live demo.
+### 2.8 Identity and access in the prototype (`dev` stub by default; Keycloak optional)
+- **Default: `AUTH_PROVIDER=dev`.** No container runtime or identity server needed. The adapter returns a fixed demo `Principal` (no network call) with a hard-coded `user_id`, `name`, `roles` and `programs`, selectable by an env var or request header so the team can demo each program/role combination (clinician on Article 31, clinician on Adult/Youth ACT, supervisor on all programs) without logging in.
+  - **This is how "the program is set by role" is met** even without Keycloak: the stub's `programs` list drives the same program-picker-skip behavior a real token would.
+- **Backend:** FastAPI dependencies `require_program(p)` and `require_role("clinician")` protect the routes the same way regardless of which `AuthProvider` is configured. Only a `clinician` can approve their own note.
+- **Frontend:** with `AUTH_PROVIDER=dev`, the sign-in screen can skip any redirect and go straight to the app, or redirect through a trivial local mock — no running identity server required.
+- **Optional stretch: real `oidc` adapter against Keycloak**, if time allows:
+  - `infra/docker-compose.yml` (or Podman) starts Keycloak and imports `infra/keycloak/realm-jb-demo.json`, which is committed and contains synthetic users only.
+  - Clients: `cda-web` (public, PKCE), `cda-api` (token audience).
+  - Roles: `clinician` and `supervisor`, plus one program role per program: `program:adult_act`, `program:youth_act`, `program:health_home`, `program:apt_treatment`, `program:article31`.
+  - Demo users: `art31.clinician`, `act.clinician`, `supervisor`. Passwords live in `.env.example` as obviously fake demo values.
+  - The `oidc` adapter checks the JWT against the issuer's public keys (JWKS) and maps the role claim to a `Principal`; `react-oidc-context` (`oidc-client-ts`) sends the user to the login page and attaches the token to every API call.
+- **Switching to Entra ID** (production): change `OIDC_ISSUER`, `OIDC_AUDIENCE` and `OIDC_ROLE_CLAIM` (Keycloak uses `realm_access.roles`, Entra uses `roles`), and set the JB tenant id so the adapter also checks the `tid` claim. The frontend library changes from `react-oidc-context` to MSAL, because the JB standard requires MSAL for single-page apps (see §7).
 
-### 2.9 Local stack (`docker-compose.yml`)
-| Service | Image | Port | Purpose |
+### 2.9 Local stack
+No container runtime (Docker Desktop, Podman, etc.) is required to run the prototype.
+
+| Piece | How it runs | Port | Purpose |
 |---|---|---|---|
-| `postgres` | `pgvector/pgvector:pg16` | 5432 | Notes, versions, audit, KB chunks + vectors |
-| `keycloak` | `quay.io/keycloak/keycloak` (dev mode, realm import) | 8080 | Sign-in, roles |
-| `backend` | local build | 8000 | FastAPI |
+| Postgres (+ pgvector) | Native local install, or any Postgres the developer already has, or a managed/cloud instance | 5432 | Notes, versions, audit, KB chunks + vectors |
+| Sign-in | `AUTH_PROVIDER=dev` stub, in-process, no separate service | — | Sign-in, roles |
+| `backend` | `uvicorn` | 8000 | FastAPI |
 | `frontend` | Vite dev server | 5173 | React app |
 
-Optional services:
+Optional, if someone picks up a stretch item:
+- `infra/docker-compose.yml` (Postgres + Keycloak via Docker/Podman), for anyone who wants containers or wants to demo the real `oidc` adapter.
 - `qdrant`, to demo switching the search provider.
 - `whisper`, for local speech-to-text.
 
 The embedding model (about 130 MB) is downloaded once by `scripts/fetch_models.py` before the demo.
 
 **Licenses:** all components are permissive or open source:
-- Keycloak, Qdrant, sentence-transformers, OpenTelemetry: Apache-2.0.
+- Qdrant (optional), Keycloak (optional), sentence-transformers, OpenTelemetry: Apache-2.0.
 - Postgres and pgvector: PostgreSQL License.
 - Docling, faster-whisper, bge models: MIT.
 
@@ -368,7 +364,7 @@ The embedding model (about 130 MB) is downloaded once by `scripts/fetch_models.p
 | Build real (thin but working) | Stub or minimal | Describe only |
 |---|---|---|
 | Interfaces and registry for **llm, auth, search, audit** | Interfaces for parser, embeddings, blob, speech, secrets, each with one simple adapter | Azure adapters, Entra ID, immutable storage |
-| Token check on every endpoint (`dev` first, Keycloak `oidc` if time allows) | Keycloak realm (stretch) | RBAC detail, BAAs, EHR integration |
+| Token check on every endpoint (`dev` by default, Keycloak `oidc` if time allows) | Keycloak realm (stretch) | RBAC detail, BAAs, EHR integration |
 | Hash-chained audit log and verify | Audit view in the UI | Log Analytics, SIEM forwarding |
 | Version stamps: prompt, rules, KB hash | | CI/CD gates, model-change governance |
 | Issue schema check, citation check, no-invention guard | | De-identification of pasted text |
@@ -392,7 +388,7 @@ backend/  app/main.py, api/, services/{draft,assess,followup}.py, kb/ingest.py, 
           providers/registry.py
           providers/{llm,auth,parser,embeddings,search,blob,speech,secrets,audit}/{base.py, <adapter>.py…}
 frontend/ src/pages/{WriteNote,CheckNote}.tsx, src/components/{ProgramSelector,DictationBox,PasteBox,NoteEditor,IssuesPanel,StatusBanner}.tsx, src/auth/
-infra/    docker-compose.yml, keycloak/realm-jb-demo.json (synthetic users only)
+infra/    docker-compose.yml (optional, for Postgres+Keycloak via Docker/Podman), keycloak/realm-jb-demo.json (synthetic users only, stretch)
 knowledge-base/sources/<program>/ + manifest.yaml
 rules/<program>.yaml, rules/_common_medicaid_nys.yaml
 prompts/{draft,assess_content,followup}.md
@@ -408,14 +404,14 @@ docs/{architecture.md, submission/}
 |---|---|
 | A: Regulations & rules | Download NYS docs per program, write manifest.yaml, author rules/*.yaml with sources and review status. Use Claude to draft rules from the documents, then verify each against its section. This is the critical path, so start immediately, and A does no other build work. |
 | B: Backend & AI | FastAPI, **provider registry + interfaces**, LLM and auth (OIDC) adapters, prompts, draft/assess/follow-up services, rule engine, guard against invented content, citation check |
-| C: Frontend | React UI, JB branding, OIDC login (`react-oidc-context`), Web Speech dictation, draft editor, issues panel, approval flow, provenance highlighting |
-| D: Data, KB & submission | Synthetic data (pass/fail ×5), **content pipeline** (Docling → chunk → bge → pgvector hybrid), Keycloak realm, audit log, retrieval eval, evaluation script, submission docs (problem, impact, pilot, cost, risks) |
+| C: Frontend | React UI, JB branding, `dev`-stub sign-in by default (OIDC login via `react-oidc-context` as a stretch), Web Speech dictation, draft editor, issues panel, approval flow, provenance highlighting |
+| D: Data, KB & submission | Synthetic data (pass/fail ×5), **content pipeline** (Docling → chunk → bge → pgvector hybrid), Keycloak realm (stretch), audit log, retrieval eval, evaluation script, submission docs (problem, impact, pilot, cost, risks) |
 
 The P1–P4 split in `.claude/plans/team-responsibility-split.md` maps onto this table. In both, regulation collection belongs to one person who does not also own the orchestrator.
 
 ## 5. Phased build
 1. **Foundation**:
-   - Repo scaffold, `.env.example`, `docker-compose` (Postgres + Keycloak), provider registry with the `llm`, `auth` (start with `dev`, then `oidc`) and `search` interfaces, ET time util.
+   - Repo scaffold, `.env.example`, native Postgres setup, provider registry with the `llm`, `auth` (`dev` by default; `oidc`/Keycloak only if time allows) and `search` interfaces, ET time util.
    - Framework and rules for **one program end to end** (Article 31 is simplest; it uses SOAP).
    - One passing and one failing note for that program.
 2. **Core loop**: draft → assess → follow-up questions → edit → approve working for Article 31 in the UI.

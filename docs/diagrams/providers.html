@@ -61,7 +61,7 @@ th.proto { background: #15803d; } th.prod { background: #1d4ed8; }
 <div class="foot">
   <div class="panel"><h2>Rules for every wrapper</h2><b>Real</b> = built and tested. <b>Minimal</b> = interface plus one simple adapter. <b>Describe only</b> = documented, not built.<br>Adapters return <b>our</b> types (Passage, Principal, Issue), never SDK objects. No vendor import outside <code>providers/</code>.</div>
   <div class="panel"><h2>Proven before switching</h2>Contract tests in <code>tests/providers/</code> run the same suite on every adapter. The evaluation matrix must not change after a switch.</div>
-  <div class="panel"><h2>Runs locally</h2><code>docker compose up</code> → Postgres + pgvector, Keycloak (synthetic realm), backend, frontend. All Apache-2.0 / MIT / PostgreSQL licensed.</div>
+  <div class="panel"><h2>Runs locally</h2>Native Postgres + pgvector, <code>AUTH_PROVIDER=dev</code> for sign-in (Keycloak optional, if time allows), backend, frontend — no container runtime required. All Apache-2.0 / MIT / PostgreSQL licensed.</div>
 </div>
 
 </div></body></html>

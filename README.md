@@ -36,7 +36,7 @@ Clinicians spend substantial time on documentation compliance, often rewriting n
 - **Issue schema** with: what's missing, requirement, source, severity, fix suggestion
 
 ### 🔐 Security & Control
-- Authentication via Keycloak (OIDC)
+- Authentication via a dev-stub provider by default (fixed synthetic demo users, no login server needed); a real Keycloak/OIDC adapter is an optional stretch path
 - Audit trail of all drafts, edits, and approvals
 - Synthetic data only (no real PHI)
 - Hash-chain versioning of all changes
@@ -47,8 +47,8 @@ Clinicians spend substantial time on documentation compliance, often rewriting n
 
 **Backend**
 - Python 3.11+, FastAPI
-- PostgreSQL + pgvector (via SQLModel)
-- Keycloak (OIDC auth)
+- PostgreSQL + pgvector (via SQLModel), installed natively — no container runtime required
+- Dev-stub auth by default; Keycloak (OIDC auth) optional, stretch goal
 - Docling (document parsing)
 - bge-small (local embeddings)
 
@@ -58,8 +58,8 @@ Clinicians spend substantial time on documentation compliance, often rewriting n
 - Web Speech API (dictation)
 
 **Infrastructure**
-- Docker Compose (local dev)
-- Postgres + Keycloak containers
+- Native Postgres for local dev (no Docker Desktop needed)
+- Optional: Docker/Podman Compose, if someone wants to run Postgres + Keycloak in containers
 
 **AI**
 - Claude (via Anthropic API)
@@ -87,14 +87,14 @@ clinical-documentation-assistant/
 │   ├── src/
 │   │   ├── pages/               # WriteNote, CheckNote screens
 │   │   ├── components/          # Reusable UI components
-│   │   ├── auth/                # OIDC integration
+│   │   ├── auth/                # Dev-stub auth by default; OIDC integration optional
 │   │   └── App.tsx              # Main app
 │   ├── index.html
 │   └── vite.config.ts
 │
-├── infra/                        # Infrastructure
-│   ├── docker-compose.yml       # Local dev services
-│   └── keycloak/                # Auth realm config
+├── infra/                        # Infrastructure (optional — only needed for the Keycloak stretch)
+│   ├── docker-compose.yml       # Optional: Postgres + Keycloak via Docker/Podman
+│   └── keycloak/                # Auth realm config (stretch only)
 │
 ├── knowledge-base/              # (Out of scope for prototype)
 │   └── sources/                 # NYS regulations & guidance docs
@@ -140,8 +140,10 @@ clinical-documentation-assistant/
 ### Prerequisites
 - Python 3.11+
 - Node.js 18+
-- Docker & Docker Compose
+- PostgreSQL 16+ (native install, or any Postgres you already have, or a managed/cloud instance) with the `pgvector` extension enabled
 - Git
+
+No container runtime (Docker Desktop, Podman, etc.) is required. `infra/docker-compose.yml` is available as an optional convenience if you'd rather run Postgres (and, for the Keycloak stretch, Keycloak) in containers.
 
 ### 1. Clone and Install
 
@@ -173,8 +175,11 @@ cp .env.example .env.local
 # Edit .env.local for your environment
 ```
 
-### 3. Start Infrastructure
+### 3. Start Postgres
 
+Use whatever Postgres instance you already have (native local install or managed/cloud), with `pgvector` enabled, and point `DATABASE_URL` in `.env` at it. No separate "start infrastructure" step is required — auth defaults to `AUTH_PROVIDER=dev`, so no identity server is needed either.
+
+Optional: if you'd rather run Postgres (and the optional Keycloak stretch) in containers:
 ```bash
 # From root directory
 docker-compose -f infra/docker-compose.yml up -d
@@ -211,7 +216,7 @@ npm run dev
 - **Frontend:** http://localhost:5173
 - **Backend API:** http://localhost:8000
 - **API Docs:** http://localhost:8000/docs
-- **Keycloak Admin:** http://localhost:8080 (admin/admin)
+- **Keycloak Admin (optional, only if the Keycloak stretch is running):** http://localhost:8080 (admin/admin)
 
 ---
 
@@ -301,7 +306,7 @@ python scripts/evaluate.py adult_act
 - **Write a note:** Fill in a session, see the draft, address issues
 - **Check a note:** Paste a finished note, verify assessment
 - **Dictation:** Test voice input (Chrome/Edge required)
-- **Auth:** Sign in with dev user (see Keycloak realm config)
+- **Auth:** Sign in with a fixed dev-stub user (`AUTH_PROVIDER=dev`); Keycloak realm login only applies if that stretch goal is built
 
 ---
 
@@ -334,7 +339,7 @@ See [docs/architecture.md](docs/architecture.md) for:
 | Role | Focus | Lead |
 |------|-------|------|
 | **A** | Regulations & rules | Documentation requirements |
-| **B** | Backend & AI | FastAPI, providers, Keycloak |
+| **B** | Backend & AI | FastAPI, providers, auth (dev stub default, Keycloak stretch) |
 | **C** | Frontend & brand | React, OIDC, Jewish Board UI |
 | **D** | Data & evaluation | Synthetic data, demo script, submission |
 
@@ -387,8 +392,9 @@ See [docs/it-software-request.md](docs/it-software-request.md) for implementatio
 
 ### Backend won't start
 ```bash
-# Check Postgres is running
-docker-compose -f infra/docker-compose.yml ps
+# Check your Postgres instance is running and reachable
+pg_isready -h localhost -p 5432
+# (or, if using the optional docker-compose path: docker-compose -f infra/docker-compose.yml ps)
 
 # Check .env has DATABASE_URL
 cat .env | grep DATABASE_URL
@@ -406,7 +412,7 @@ alembic upgrade head
 curl http://localhost:8000/docs
 ```
 
-### Keycloak login fails
+### Keycloak login fails (only applies if you've built the optional Keycloak stretch)
 ```bash
 # Check admin console
 http://localhost:8080/admin (admin/admin)
@@ -414,6 +420,7 @@ http://localhost:8080/admin (admin/admin)
 # Verify realm is loaded
 # Check frontend auth config uses correct issuer & audience
 ```
+If you're not using the Keycloak stretch, auth issues almost always mean `AUTH_PROVIDER` in `.env` isn't set to `dev`.
 
 ### Database errors
 ```bash

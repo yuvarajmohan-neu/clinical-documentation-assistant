@@ -6,11 +6,11 @@ The repo is greenfield: only `CLAUDE.md`, `docs/architecture.md`, diagrams and t
 | Person | Ownership |
 |---|---|
 | **P1** | React web application, submission documents |
-| **P2** | Keycloak, DB, Audit log, synthetic demo data |
-| **P3** | Backend orchestrator, prompts, LLM adapters, citation check, evaluation script, demo-visible extras |
-| **P4** | RAG pipeline, search, rules engine code, **plus all regulation/documentation collection** (sources, program frameworks, rules content). Rule drafting is done with Claude, then verified against each source section. P4 takes this from P3 because the orchestrator and the regulation work were too much for one person. |
+| **P2** | DB (native Postgres), Auth (`dev` stub default; Keycloak stretch), Audit log, synthetic demo data |
+| **P3** | Backend orchestrator, prompts, LLM adapters, citation check, evaluation script, demo-visible extras, **plus all regulation/documentation collection** (sources, program frameworks, rules content) **and the rules engine**. Rule drafting is done with Claude, then verified against each source section. P3 is the senior person on the team and takes this whole vertical — orchestrator through rules — rather than splitting it with P4. |
+| **P4** | **One self-contained feature: the KB ingest pipeline** — parser, embeddings, chunking, hybrid search, the ingest CLI, and the retrieval quality check. Deliberately scoped so P4 can build and finish it independently, with no ownership of rules, regulation content, or the orchestrator. |
 
-Note: P2 and P4 share the load, so P4's search work leans on P2's table schema early. If P4 is overloaded, move the rules engine code to P2 and keep P4 on regulations, rules and ingest.
+Note: P4's only external dependency is P2's `kb_chunks`/`kb_documents` table shape (vector column + keyword index) — agree that schema early, everything else about the pipeline is self-contained. P4 also needs *some* real documents to validate retrieval against; until P3 delivers at least Article 31's manifest, P4 builds and tests against a couple of sample documents.
 
 ## Shared contracts (agreed by all four before building)
 1. **Repo scaffold** (P3): `backend/`, `frontend/`, `infra/`, `rules/`, `prompts/`, `knowledge-base/`, `synthetic-data/`, `.env.example`, `.gitignore` (incl. `.env`).
@@ -25,8 +25,9 @@ Note: P2 and P4 share the load, so P4's search work leans on P2's table schema e
 4. **DB schema** (proposed by P2, signed off by all): `notes`, `note_versions`, `assessments`, `audit_log`, `kb_documents`, `kb_chunks`.
 5. **Provider ABCs** in `backend/providers/<cap>/base.py`: `LLMProvider.complete_structured`, `SearchProvider.search(query, programs, k) -> list[Passage]`, `AuditProvider.record(event)`, `AuthProvider.verify(token) -> Principal`.
 6. **Mock API server** (P3) returning canned JSON so P1 can build without waiting.
-7. **Rule file format** (P3 defines, P4 consumes): every rule has `id, element, type, severity, requirement, source`; `source` must point to a collected document and section.
+7. **Rule file format** (P3 defines and authors, end to end): every rule has `id, element, type, severity, requirement, source`; `source` must point to a collected document and section. No handoff to P4 — P3 owns this file from definition through content.
 8. **ET time helper** `backend/util/time_et.py` (P3): 12-hour Eastern, e.g. `11/6/2026 2:05 PM ET`.
+9. **`Passage` shape** (P4 defines, P3 consumes): `source_id, section, url, text, score` — this is the one contract P4 hands upward into P3's `ContentChecker`/`assess` service.
 
 ---
 
@@ -36,7 +37,7 @@ Note: P2 and P4 share the load, so P4's search work leans on P2's table schema e
 - Load the **jewish-board-brand skill** (`.claude/skills/jewish-board-brand/references/web-guide.md`, `scripts/jb_brand.py`) before any styling. Logo, colours and fonts via brand tokens only.
 - Typed API client generated from `docs/api.yaml`; develop against P3's mock first, then the real API.
 - Components in `src/components/`:
-  1. `ProgramSelector.tsx`: five programs; locked when the Keycloak role implies the program.
+  1. `ProgramSelector.tsx`: five programs; locked when the signed-in role (dev stub by default, Keycloak if the stretch is built) implies the program.
   2. Session picker: lists synthetic sessions and pre-fills client, date, time, service type and modality (12-hour ET).
   3. **Two pages** under one app shell: **Write a note** (`pages/WriteNote.tsx`) and **Check a note** (`pages/CheckNote.tsx`). Separate pages, no mode toggle.
      - `DictationBox.tsx` (Write page): type or **dictate** with the browser Web Speech API (interim text, unsupported-browser fallback). Calls `/draft` then `/assess`.
@@ -46,22 +47,26 @@ Note: P2 and P4 share the load, so P4's search work leans on P2's table schema e
   5. `IssuesPanel.tsx`: per issue, what's wrong, the requirement with a clickable source, how to fix it, and a severity badge (icon plus colour, not colour alone). Click an issue to jump to the text. Follow-up questions with answer boxes that feed back into the draft.
   6. `StatusBanner.tsx`: Meets standards / Meets standards with warnings / Needs attention, shown before finalization.
   7. Approve flow: confirm dialog, button disabled while a Critical is open, version history drawer.
-  8. `src/auth/`: `react-oidc-context` against Keycloak, bearer token on every call, role → program.
+  8. `src/auth/`: dev-stub sign-in by default (no redirect needed), bearer token on every call, role → program; `react-oidc-context` against Keycloak is an optional stretch swap.
 - Loading, empty and error states; keyboard and screen-reader accessibility.
 
 **Submission pack** (`docs/submission/`): problem, solution, impact metrics (time per note, first-pass compliance, audit findings), implementation approach, cost and value, risks/oversight/security/assumptions, and the demo script.
 
-**Depends on:** P3 (OpenAPI, mock, real API), P2 (Keycloak realm), P2 (synthetic data for evaluation).
+**Depends on:** P3 (OpenAPI, mock, real API), P2 (dev-stub auth working first, Keycloak realm if the stretch is picked up), P2 (synthetic data for evaluation).
 
 ---
 
-## P2 — Keycloak, DB, Audit log (+ synthetic data)
+## P2 — DB, Auth (dev stub default), Audit log (+ synthetic data)
 
-**Infra** (`infra/`)
-- `docker-compose.yml`: Postgres with **pgvector** and Keycloak, healthchecks, named volumes.
+**Database** (native Postgres, no container runtime required; a dev's own Postgres install or a managed/cloud instance both work)
+- Enable the `pgvector` extension locally.
+
+**Auth provider** (`backend/providers/auth/`): `base.py`, `dev.py` (`AUTH_PROVIDER=dev`, the default offline fallback — build and wire this first so P1/P3 are never blocked), FastAPI `current_principal` dependency, contract tests in `tests/providers/`.
+
+**Stretch (only after `dev` works and if time allows): real Keycloak `oidc` adapter**
+- `infra/docker-compose.yml` (already in the repo, runs via Docker or Podman): Postgres with **pgvector** and Keycloak, healthchecks, named volumes — optional, for anyone who wants containers or wants to demo real OIDC.
 - `keycloak/realm-jb-demo.json`: realm, SPA client (PKCE), API audience, **synthetic users only**, one role per program (`program:adult_act`, `program:youth_act`, `program:health_home`, `program:apt_treatment`, `program:article31`) plus `clinician` and `supervisor`, role claim mapper. Document `OIDC_ISSUER`, `OIDC_AUDIENCE`, `OIDC_ROLE_CLAIM` in `.env.example`.
-
-**Auth provider** (`backend/providers/auth/`): `base.py`, `oidc.py` (JWKS, issuer/audience/expiry checks, role → program → `Principal`), `dev.py` (`AUTH_PROVIDER=dev` offline fallback), FastAPI `current_principal` dependency, contract tests in `tests/providers/`.
+- `oidc.py` (JWKS, issuer/audience/expiry checks, role → program → `Principal`).
 
 **Database** (`backend/db/`)
 - SQLModel models and migrations for the agreed schema.
@@ -80,63 +85,65 @@ Note: P2 and P4 share the load, so P4's search work leans on P2's table schema e
 
 **Production notes** for `docs/submission/`: HIPAA safeguards, BAA, role-based access, audit logging, JB Azure mapping (use the **azure-standards skill**). Describe only.
 
-**Depends on:** shared schema; P3's rules (for fail notes). **Delivers to:** P1 (realm, login), P3 (repos, principal, audit), P4 (kb tables), P1 (evaluation data).
+**Depends on:** shared schema; P3's rules (for fail notes). **Delivers to:** P1 (dev-stub login, realm if built), P3 (repos, principal, audit), P4 (kb tables), P1 (evaluation data).
 
 ---
 
-## P3 — Backend orchestrator + regulation/documentation collection
+## P3 — Backend orchestrator, regulation collection, rules engine (senior, full vertical)
 
 ### A. Orchestrator (`backend/`)
 - `app/main.py` and `api/` routers per the OpenAPI contract; error model; CORS for Vite; settings from env; `providers/registry.py` choosing adapters from `*_PROVIDER` settings.
 - `providers/llm/`: `base.py`, `anthropic.py` (use the **claude-api skill** for current model ids and structured output), `azure_foundry.py` stub, `fake.py` for tests and offline demos. Claude is reachable only through `complete_structured(prompt_id, vars, schema)`.
 - `prompts/draft.md`, `assess_content.md`, `followup.md` with version front matter; every output records the prompt version.
 - `services/draft.py`: loads session and program framework, retrieves passages via P4's `SearchProvider`, calls Claude, pre-fills known fields, links interventions to treatment plan goals, sets gaps to `[NOT PROVIDED]` and returns `blanks[]`. Enforces "no invented clinical content".
-- `services/assess.py`: runs P4's `RuleEngine` and `ContentChecker` (Claude, grounded in retrieved passages), merges and de-duplicates issues, validates against the `Issue` schema, computes status.
+- `services/assess.py`: runs P3's own `RuleEngine` and `ContentChecker` (Claude, grounded in passages retrieved through P4's `SearchProvider`), merges and de-duplicates issues, validates against the `Issue` schema, computes status.
 - `services/followup.py`: turns gaps and issues into targeted questions.
 - Approve gate: `POST /notes/{id}/approve` re-assesses and returns 409 while a Critical is open; every action writes to the audit log.
 - Versioning stamped on every draft and assessment: prompt version, rule-set version, KB manifest hash.
 - Tests: status computation, ET time, approve-blocked-on-Critical, LLM output schema validation.
 
 ### B. Evaluation and demo-visible extras — moved from P1
-- **Evaluation** (`scripts/evaluate.py`): runs every synthetic note through `/assess` and checks that each pass note has 0 Critical issues and each fail note hits its `expected.json` rule ids, across all 5 programs. Also the test that sparse input stays `[NOT PROVIDED]`. Depends on P2's data and P4's rules.
+- **Evaluation** (`scripts/evaluate.py`): runs every synthetic note through `/assess` and checks that each pass note has 0 Critical issues and each fail note hits its `expected.json` rule ids, across all 5 programs. Also the test that sparse input stays `[NOT PROVIDED]`. Depends on P2's data and P3's own rules.
 - **Demo-visible extras** (architecture §2.12): provenance highlighting (`source_spans`), clickable citations (retrieved passage with document, section, page), an evaluation scoreboard, and the audit **Verify** flow (`GET /audit/verify`) for the tamper demo. Stretch: rule explorer. P1 still builds the UI for these once P3 exposes the data/endpoints.
 
-### C. Regulation and documentation collection (all programs) — moved to P4, see the table above
+### C. Regulation and documentation collection (all programs)
 For each of the five programs (Adult ACT, Youth ACT, Health Home Care Coordination, Apartment Treatment Housing, Article 31 clinic):
 1. **Download** the publicly available NYS regulations, program guidance and documentation requirements, plus Medicaid and NYS documentation standards into `knowledge-base/sources/<program>/`.
 2. **Manifest** `manifest.yaml` per program: `id, title, url, date, version, sha256` per document.
 3. **Documentation framework** per program: note types, required elements, timelines, rules. Write it up in `docs/frameworks/<program>.md`.
-4. **Rules content**: `rules/<program>.yaml` and `rules/_common_medicaid_nys.yaml`, where **every rule links to a source document and section**.
-5. Hand the manifests to P4 for ingest and the rule files to P4 for engine validation. Hand the rule list to P2 so fail notes target real rules.
+4. **Rules content**: `rules/<program>.yaml` and `rules/_common_medicaid_nys.yaml`, where **every rule links to a source document and section**. Rules are drafted with Claude from the collected documents, then manually verified against each source section before being committed.
+5. Hand the manifests to P4 for ingest (P4 doesn't do the collecting, just the indexing). Hand the rule list to P2 so fail notes target real rules.
 
-**Depends on:** P2 (repos, auth, audit), P4 (search, rules engine). Develop against the ABCs and `fake` implementations so nothing blocks.
+### D. Rules engine (`backend/rules_engine/`)
+- Loader and validator for P3's own rule files (section C above); rejects any rule without a source.
+- Rule types: required field present, timeline (uses the ET time helper), format (SOAP sections), signature/credentials.
+- Emits `Issue` objects; produces a rule-set version.
+- `ContentChecker` input contract agreed with P4 (P4's retrieved passages in, `Issue[]` out); P3 owns the prompt and the rule content, P4 owns only the retrieval feeding it.
+- Unit tests per rule type.
+
+**Depends on:** P2 (repos, auth, audit), P4 (`SearchProvider` for retrieval). Develop against the ABCs and `fake` implementations so nothing blocks.
 
 ---
 
-## P4 — Backend pieces: RAG and rules engine
+## P4 — One feature: the KB ingest pipeline
+
+A single, self-contained deliverable so P4 can build and finish it independently, with no ownership of rules, regulation content, or the orchestrator.
 
 **Knowledge base pipeline** (`backend/kb/ingest.py` and providers `parser`, `embeddings`, `search`, `blob`)
-- `parser/docling.py`: Docling parse into structured sections, keeping page and section metadata.
+- `parser/docling.py`: Docling parse into structured sections, keeping page and section metadata (pypdf as a fallback).
 - `embeddings/bge_small.py`: local bge-small, batched.
 - `search/pgvector_hybrid.py`: Postgres full-text plus vector search with rank fusion, filtered by program, returns `Passage` (`source_id`, `section`, `url`, `text`, score).
 - Section-aware chunking that keeps the heading path. Idempotent ingest keyed by `sha256` from P3's manifests, and a computed **KB manifest hash** for versioning.
 - CLI: `python -m backend.kb.ingest --program <program>`.
-- Retrieval quality checks: a small question set per program asserting the right section appears in the top results.
-
-**Rules engine** (`backend/rules_engine/`)
-- Loader and validator for P3's rule files; rejects any rule without a source.
-- Rule types: required field present, timeline (uses the ET time helper), format (SOAP sections), signature/credentials.
-- Emits `Issue` objects; produces a rule-set version.
-- `ContentChecker` input contract agreed with P3 (retrieved passages in, `Issue[]` out); P3 owns the prompt, P4 owns the retrieval feeding it.
+- Retrieval quality checks (`scripts/eval_retrieval.py`): a small question set per program asserting the right section appears in the top results (hit@5).
 - Provider contract tests for parser, embeddings and search in `tests/providers/`.
-- Unit tests per rule type.
 
-**Depends on:** P2 (kb tables, pgvector), P3 (manifests, rule files). **Delivers to:** P3 (`SearchProvider`, `RuleEngine`).
+**Depends on:** P2 (`kb_chunks`/`kb_documents` tables, pgvector), P3 (manifests — but can build and test against a couple of sample documents before P3 delivers the real ones). **Delivers to:** P3 (`SearchProvider` only — P3's `RuleEngine` and `ContentChecker` are P3's own now).
 
 ---
 
 ## Verification (definition of done)
-- `docker compose -f infra/docker-compose.yml up` starts Postgres and Keycloak; logging in as a synthetic Article 31 user sets the Article 31 program.
+- Native Postgres running locally and `AUTH_PROVIDER=dev` selecting a synthetic Article 31 user sets the Article 31 program (no container runtime required). If the Keycloak stretch is built, `docker compose -f infra/docker-compose.yml up` plus logging in as that same synthetic user is an equivalent check.
 - `pytest` passes: rule engine, ET time, status, audit tamper test, provider contract tests.
 - `scripts/evaluate.py`: every pass note has 0 Critical issues; every fail note hits its expected rule ids, across all 5 programs.
 - Sparse input stays `[NOT PROVIDED]`; approve returns 409 while a Critical is open.
