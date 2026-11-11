@@ -1,0 +1,86 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Check a note mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .layout { display: grid; grid-template-columns: 1fr 400px; gap: 24px; align-items: start; }
+  .paste .textarea { min-height: 470px; font-size: 14.5px; line-height: 1.5; }
+  .paste .textarea .h { font-weight: 700; }
+  .opts { display: grid; grid-template-columns: auto 240px 1fr; gap: 20px; align-items: end; margin-bottom: 18px; }
+  .paste-bar { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
+  .paste-bar .sp { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+  .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .checks li { display: flex; gap: 10px; font-size: 14.5px; align-items: flex-start; }
+  .checks li svg.ic { color: var(--jb-green); margin-top: 1px; }
+  .optional { font-weight: 400; color: #5b5557; }
+</style></head>
+<body>
+<div id="app-header" data-nav="check"></div>
+<main class="main">
+  <div class="crumbs">Session setup <i data-ic="right"></i> <b>Check a note</b></div>
+  <div class="page-head">
+    <div>
+      <h1>Check a note</h1>
+      <p class="lede">Paste a finished note that was written somewhere else. The assistant checks it against Article 31 requirements and tells you what to fix. It doesn’t rewrite your note.</p>
+    </div>
+  </div>
+
+  <div class="layout">
+    <section class="card paste">
+      <div class="opts">
+        <label class="field"><span>Note type</span>
+          <span class="seg"><span class="on">Progress note</span><span>Treatment plan update</span></span></label>
+        <label class="field"><span>Date of service <span class="optional">(optional)</span></span>
+          <span class="input">10/30/2026</span></label>
+        <div class="hint small" style="padding-bottom:10px"><i data-ic="info"></i><span>With a date, the check can confirm the note was finished on time.</span></div>
+      </div>
+      <div class="field"><span>Pasted note</span>
+      <div class="textarea"><span class="h">Progress Note — Article 31 Outpatient Clinic</span>
+
+Client: Morgan Lee (synthetic) — ART31-C002
+Date of service: 10/30/2026 2:30 PM ET
+Service type: Individual Therapy
+Modality: Telehealth
+Duration: 50 minutes
+Clinician: Alex RiveraDemo, LCSW (synthetic)
+
+<span class="h">Subjective</span>
+Client discussed ongoing low mood and difficulty attending sessions consistently.
+
+<span class="h">Objective</span>
+Client logged in on time via telehealth platform. Appeared tired.
+
+<span class="h">Assessment</span>
+Discussed attendance goal (Goal G1). Client has missed two of the last six scheduled sessions.
+
+Intervention: Discussed barriers to attendance and reviewed coping strategies for low motivation.
+
+<span class="h">Plan</span>
+Continue weekly individual therapy. Follow up next week.</div></div>
+      <div class="paste-bar">
+        <span class="small muted">No microphone on this page. Paste or type only.</span>
+        <div class="sp">
+          <button class="btn btn-ghost">Clear</button>
+          <button class="btn btn-primary btn-lg"><i data-ic="shield"></i>Check note</button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="stack">
+      <section class="card">
+        <h3 style="margin-bottom:12px">What gets checked</h3>
+        <ul class="checks">
+          <li><i data-ic="check"></i><span><b>Required fields and timelines</b> from the Article 31 rule set, e.g. signature, date, duration, service type</span></li>
+          <li><i data-ic="check"></i><span><b>Medicaid and NYS documentation standards</b> that apply to every program</span></li>
+          <li><i data-ic="check"></i><span><b>Clinical content</b>: intervention and client response, measurable progress on goals, medical necessity</span></li>
+        </ul>
+        <p class="small muted" style="margin-top:14px">Each finding links to the regulation section it comes from.</p>
+      </section>
+      <section class="callout purple">
+        <i data-ic="warning"></i><span><b>Synthetic data only.</b> Don’t paste notes about real clients. This prototype isn’t approved for client information.</span>
+      </section>
+    </aside>
+  </div>
+  <div class="mock-note"><span>UI mockup · Synthetic data only · Note text from <code>synthetic-data/article31/notes/fail_article31_01.md</code></span><span>Check note → <code>POST /assess</code> only, no draft step.</span></div>
+</main>
+<script src="shell.js"></script>
+</body></html>

@@ -1,0 +1,112 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Component states mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .main { padding: 36px 40px 40px; }
+  .sheet { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .full { grid-column: 1 / 3; }
+  .card h2 { font-size: 22px; display: flex; gap: 10px; align-items: center; }
+  .cmp { font-family: Consolas, monospace; font-size: 12px; font-weight: 700; color: var(--jb-purple); border: 1.5px dashed var(--jb-purple); border-radius: 6px; padding: 2px 7px; letter-spacing: 0; }
+  .row { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: center; padding: 14px 0; border-top: 1px solid var(--jb-border); }
+  .row:first-of-type { border-top: none; }
+  .row > .k { font-weight: 700; font-size: 14px; }
+  .row > .k span { display: block; font-weight: 400; color: #5b5557; font-size: 13px; margin-top: 2px; }
+  .status .t { font-size: 21px; }
+  .err { border: 2px solid var(--jb-red); border-radius: var(--jb-radius-md); padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start; font-size: 14px; background: #fff; }
+  .err svg.ic { color: var(--jb-red); }
+  .spinner { width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(255,255,255,.45); border-top-color: #fff; display: inline-block; }
+  .mic { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; border: none; flex: none; }
+  .mic svg.ic { width: 22px; height: 22px; }
+  .mic.idle { background: var(--jb-blue); color: #fff; }
+  .mic.on { background: var(--jb-red); color: #fff; box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--jb-red); }
+  .inline { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .sw { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; }
+  .sw i { width: 100%; height: 44px; border-radius: var(--jb-radius-sm); display: block; }
+  .swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+</style></head>
+<body>
+<div id="app-header" data-nav=""></div>
+<main class="main">
+  <div class="page-head"><div><h1>Component states</h1><p class="lede">Every state of the shared review screen components. Colours come only from The Jewish Board palette, and severity always uses an icon and a label as well as colour.</p></div></div>
+
+  <div class="sheet">
+    <section class="card full">
+      <h2>Status banner <span class="cmp">StatusBanner</span></h2>
+      <div class="row"><div class="k">Needs attention<span>Any open Critical issue</span></div>
+        <div class="status needs"><i data-ic="critical"></i><div><div class="t">Needs attention</div><div class="d">Fix 2 Critical issues before you approve.</div></div><div class="counts"><span><i data-ic="critical"></i>2 Critical</span><span><i data-ic="warning"></i>1 Warning</span></div></div></div>
+      <div class="row"><div class="k">Meets standards with warnings<span>Only Warnings open</span></div>
+        <div class="status warn"><i data-ic="warning"></i><div><div class="t">Meets standards with warnings</div><div class="d">You can approve. Consider fixing the Warnings first.</div></div><div class="counts"><span><i data-ic="warning"></i>1 Warning</span><span><i data-ic="info"></i>1 Informational</span></div></div></div>
+      <div class="row"><div class="k">Meets standards<span>No Critical issues or Warnings</span></div>
+        <div class="status meets"><i data-ic="check"></i><div><div class="t">Meets standards</div><div class="d">Ready for your review and approval.</div></div><div class="counts"><span><i data-ic="info"></i>1 Informational</span></div></div></div>
+    </section>
+
+    <section class="card">
+      <h2>Severity badges <span class="cmp">IssuesPanel</span></h2>
+      <div class="row"><div class="k">Critical<span>Must fix. Blocks approval.</span></div><div><span class="sev critical"><i data-ic="critical"></i>Critical</span></div></div>
+      <div class="row"><div class="k">Warning<span>Should fix</span></div><div><span class="sev warning"><i data-ic="warning"></i>Warning</span></div></div>
+      <div class="row"><div class="k">Informational<span>Optional</span></div><div><span class="sev info"><i data-ic="info"></i>Informational</span></div></div>
+      <div class="row"><div class="k">Check type</div><div class="inline">
+        <span style="font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 7px;background:var(--jb-white-soft)">Rule check</span>
+        <span style="font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 7px;background:var(--jb-green);color:#fff">Content check</span>
+        <span class="small muted">Deterministic rule set and Claude content check</span></div></div>
+      <div class="row"><div class="k">Empty state</div><div class="inline small"><i data-ic="check"></i><span style="flex:1">No open issues. Resolved issues are listed under “Resolved in version N”.</span></div></div>
+    </section>
+
+    <section class="card">
+      <h2>Note editor markers <span class="cmp">NoteEditor</span></h2>
+      <div class="row"><div class="k">Blank (Write)<span>Not provided by the clinician</span></div><div><span class="notprov"><i data-ic="flag"></i>[NOT PROVIDED]</span></div></div>
+      <div class="row"><div class="k">Current blank<span>Selected via issue or blank navigator</span></div><div><span class="notprov active"><i data-ic="flag"></i>[NOT PROVIDED]</span></div></div>
+      <div class="row"><div class="k">Flagged text (Check)</div><div><span class="flagged">Client has missed two of the last six scheduled sessions.</span></div></div>
+      <div class="row"><div class="k">Goal link</div><div class="inline"><a class="goal">G1</a><a class="goal">G2</a><span class="small muted">Links to the treatment plan goal</span></div></div>
+      <div class="row"><div class="k">From session record</div><div><span class="from-record"><i data-ic="record"></i>From the session record. Not editable here.</span></div></div>
+      <div class="row"><div class="k">Blank navigator</div><div><span class="blank-nav"><i data-ic="flag"></i>&nbsp;2 blanks · 1 of 2<span class="arr"><i data-ic="up"></i></span><span class="arr"><i data-ic="down"></i></span></span></div></div>
+    </section>
+
+    <section class="card">
+      <h2>Re-assess button</h2>
+      <div class="row"><div class="k">Ready<span>Edits or answers pending</span></div><div class="inline"><button class="btn btn-blue"><i data-ic="refresh"></i>Re-assess</button><span class="small"><span class="edited-dot"></span> Edited since last check</span></div></div>
+      <div class="row"><div class="k">Checking</div><div class="inline"><button class="btn btn-blue" aria-busy="true"><span class="spinner"></span>Saving and checking…</button><span class="small muted">Editor is read-only until the check finishes</span></div></div>
+      <div class="row"><div class="k">Up to date</div><div class="inline"><button class="btn btn-outline"><i data-ic="refresh"></i>Re-assess</button><span class="small muted">No changes since 2:49 PM ET</span></div></div>
+      <div class="row"><div class="k">Error</div><div class="err"><i data-ic="warning"></i><span><b>Couldn’t check the note.</b> Your edits are still here. Try Re-assess again.</span></div></div>
+    </section>
+
+    <section class="card">
+      <h2>Approve button</h2>
+      <div class="row"><div class="k">Blocked<span>Critical issue open</span></div><div class="inline"><button class="btn btn-disabled"><i data-ic="lock"></i>Approve and finalize</button><span class="small muted">Fix Critical issues first</span></div></div>
+      <div class="row"><div class="k">Ready</div><div><button class="btn btn-primary"><i data-ic="tick"></i>Approve and finalize</button></div></div>
+      <div class="row"><div class="k">Stopped by server<span>Server check found a Critical issue (409)</span></div><div class="err"><i data-ic="critical"></i><span><b>Not approved.</b> The final check found a Critical issue in an edit made after your last Re-assess. It’s now shown in Issues.</span></div></div>
+      <div class="row"><div class="k">Approved</div><div class="status meets" style="padding:10px 16px"><i data-ic="lock"></i><div><div class="t" style="font-size:18px">Approved and locked</div><div class="d">Demo Clinician (synthetic) · 11/6/2026 2:52 PM ET · Version 3</div></div></div></div>
+    </section>
+
+    <section class="card">
+      <h2>Follow-up questions</h2>
+      <div class="row"><div class="k">Write page<span>Answer box. Sent with Re-assess.</span></div>
+        <div class="fq" style="margin:0"><div class="q"><span class="qmark">1</span>How did the client respond to the intervention?</div><div class="ans empty" style="min-height:48px">Type your answer…</div></div></div>
+      <div class="row"><div class="k">Check page<span>Display only</span></div>
+        <div class="fq" style="margin:0"><div class="q"><span class="qmark">1</span>How did the client respond to the intervention?</div><div class="readonly"><i data-ic="pen"></i>Add this to the note on the left.</div></div></div>
+    </section>
+
+    <section class="card">
+      <h2>Dictation <span class="cmp">DictationBox</span></h2>
+      <div class="row"><div class="k">Idle</div><div class="inline"><button class="mic idle"><i data-ic="mic"></i></button><span class="small">Click to dictate</span></div></div>
+      <div class="row"><div class="k">Listening</div><div class="inline"><button class="mic on"><i data-ic="mic"></i></button><span class="small"><b style="color:var(--jb-red)">Listening…</b> <span class="muted" style="font-style:italic">interim text shows in grey</span></span></div></div>
+      <div class="row"><div class="k">Not supported</div><div class="callout soft" style="padding:10px 12px"><i data-ic="info"></i><span>Dictation isn’t available in this browser. Type your notes instead, or use Chrome or Edge.</span></div></div>
+    </section>
+
+    <section class="card full">
+      <h2>Palette in use</h2>
+      <div class="swatches">
+        <div class="sw"><i style="background:var(--jb-orange)"></i><b>Sunshine Orange</b>Primary actions, focus</div>
+        <div class="sw"><i style="background:var(--jb-blue)"></i><b>Classic Blue</b>Headings, Re-assess, Informational</div>
+        <div class="sw"><i style="background:var(--jb-red)"></i><b>Brick Red</b>Critical, Needs attention</div>
+        <div class="sw"><i style="background:var(--jb-yellow)"></i><b>Cab Yellow</b>Warning, blanks</div>
+        <div class="sw"><i style="background:var(--jb-green)"></i><b>Grounding Green</b>Meets standards, content check</div>
+        <div class="sw"><i style="background:var(--jb-purple)"></i><b>Classic Purple</b>Demo badge, follow-ups, flags</div>
+      </div>
+      <p class="small muted" style="margin-top:14px">Severity colours follow the suggestion in the frontend walkthrough (§4) and match the placeholder <code>--jb-severity-*</code> tokens in <code>frontend/src/index.css</code>. This still needs a team decision.</p>
+    </section>
+  </div>
+  <div class="mock-note"><span>UI mockup · Synthetic data only</span></div>
+</main>
+<script src="shell.js"></script>
+</body></html>

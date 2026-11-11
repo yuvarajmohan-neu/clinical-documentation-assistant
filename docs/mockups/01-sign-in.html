@@ -1,0 +1,58 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Sign-in mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .wrap { height: 900px; display: grid; grid-template-columns: 640px 1fr; gap: 56px; padding: 64px 72px; align-items: center; }
+  .signin { padding: 44px 44px 36px; border-radius: var(--jb-radius-xl); }
+  .signin .org { font-family: var(--serif); color: var(--jb-blue); font-size: 26px; margin: 18px 0 4px; }
+  .signin .tagline { font-size: 16px; color: var(--jb-orange); font-weight: 600; margin-bottom: 26px; }
+  .signin h1 { font-size: 42px; margin-bottom: 14px; }
+  .signin .lede { font-size: 17px; line-height: 1.45; max-width: 520px; margin-bottom: 28px; }
+  .signin ul { margin: 0 0 30px; padding: 0; list-style: none; display: grid; gap: 10px; }
+  .signin li { display: flex; gap: 10px; align-items: center; font-size: 15.5px; }
+  .signin li svg.ic { color: var(--jb-green); }
+  .signin .btn { font-size: 17px; padding: 16px 40px; }
+  .signin .fine { margin-top: 18px; display: grid; gap: 10px; }
+  /* rounded-frame collage — brand design element (not a logo) */
+  .collage { position: relative; height: 100%; }
+  .collage div { position: absolute; border-radius: var(--jb-radius-xl); }
+  .c1 { background: var(--jb-blue); left: 0; top: 40px; width: 270px; height: 330px; }
+  .c2 { background: var(--jb-orange); left: 300px; top: 0; width: 300px; height: 210px; }
+  .c3 { background: var(--jb-yellow); left: 300px; top: 240px; width: 140px; height: 130px; }
+  .c4 { background: var(--jb-purple); left: 470px; top: 240px; width: 130px; height: 300px; }
+  .c5 { background: var(--jb-green); left: 0; top: 400px; width: 440px; height: 140px; }
+  .c6 { background: var(--jb-lavender); left: 0; top: 570px; width: 180px; height: 170px; }
+  .c7 { background: var(--jb-green-spring); left: 210px; top: 570px; width: 230px; height: 170px; }
+  .c8 { background: var(--jb-blue-light); left: 470px; top: 570px; width: 130px; height: 170px; }
+  .collage .quote { position: absolute; left: 28px; top: 72px; width: 220px; color: #fff; font-family: var(--serif); font-size: 26px; line-height: 1.25; border-radius: 0; }
+  .collage .q2 { position: absolute; left: 30px; top: 432px; width: 390px; color: #fff; font-size: 14.5px; line-height: 1.45; border-radius: 0; }
+  .collage .q2 b { display: block; font-family: var(--serif); font-weight: 500; font-size: 21px; margin-bottom: 4px; }
+</style></head>
+<body>
+<div class="wrap">
+  <div class="card signin">
+    <span class="badge-demo">Synthetic data – demo only</span>
+    <div class="org">The Jewish Board</div>
+    <div class="tagline">Care for all New Yorkers</div>
+    <h1>Clinical Documentation Assistant</h1>
+    <p class="lede">Draft progress notes and treatment plan updates, then check them against your program’s New York State documentation requirements. You review and approve every change.</p>
+    <ul>
+      <li><i data-ic="pen"></i> Write a note from typed or dictated session notes</li>
+      <li><i data-ic="doc"></i> Check a note you wrote somewhere else</li>
+      <li><i data-ic="shield"></i> Every issue links to the regulation it comes from</li>
+    </ul>
+    <button class="btn btn-primary">Sign in</button>
+    <div class="fine">
+      <div class="hint"><i data-ic="info"></i><span><b>Demo mode.</b> Signing in uses a fixed synthetic clinician account. In production this button opens The Jewish Board sign-in page.</span></div>
+      <div class="hint"><i data-ic="warning"></i><span>Use synthetic data only. Never enter real client information.</span></div>
+    </div>
+  </div>
+  <div class="collage">
+    <div class="c1"></div><div class="c2"></div><div class="c3"></div><div class="c4"></div>
+    <div class="c5"></div><div class="c6"></div><div class="c7"></div><div class="c8"></div>
+    <div class="quote">Less time on paperwork. More time with clients.</div>
+    <div class="q2"><b>Five programs, one assistant</b>Adult ACT · Youth ACT · Health Home Care Coordination · Apartment Treatment Housing · Article 31 Outpatient Clinic</div>
+  </div>
+</div>
+<script src="shell.js"></script>
+</body></html>

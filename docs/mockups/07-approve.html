@@ -1,0 +1,90 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Approve mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .statusrow { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; margin-bottom: 22px; }
+  .approve-box { display: flex; align-items: center; gap: 14px; background: #fff; border: 1px solid var(--jb-border); border-radius: var(--jb-radius-lg); padding: 12px 14px 12px 20px; }
+  .layout { display: grid; grid-template-columns: 1fr 560px; gap: 24px; align-items: start; }
+  .editor { padding: 0; }
+  .added { background: var(--jb-green-spring); border-radius: 4px; padding: 0 3px; }
+  .resolved { display: flex; gap: 10px; align-items: center; font-size: 14.5px; padding: 10px 0; border-bottom: 1px solid var(--jb-border); }
+  .resolved svg.ic { color: var(--jb-green); }
+  .resolved .rid { margin-left: auto; color: #5b5557; }
+  .page { position: relative; min-height: 900px; }
+  .scrim { position: absolute; inset: 0; background: rgba(35, 31, 32, .55); }
+  .modal {
+    position: absolute; left: 50%; top: 190px; transform: translateX(-50%); width: 640px; background: #fff;
+    border-radius: var(--jb-radius-xl); padding: 32px 34px 28px; box-shadow: 0 20px 60px rgba(35,31,32,.35);
+  }
+  .modal h2 { font-size: 28px; margin-bottom: 8px; }
+  .modal .x { position: absolute; right: 22px; top: 22px; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--jb-white-soft); }
+  .modal ul { list-style: none; margin: 18px 0; padding: 0; display: grid; gap: 14px; }
+  .modal li { display: flex; gap: 12px; font-size: 15px; align-items: flex-start; }
+  .modal li svg.ic { color: var(--jb-blue); margin-top: 1px; }
+  .sig { border: 1.5px solid var(--jb-border); border-radius: var(--jb-radius-md); padding: 14px 16px; background: var(--jb-white-soft); margin: 4px 0 18px; font-size: 15px; }
+  .sig .k { font-size: 12px; font-weight: 700; color: var(--jb-green); text-transform: uppercase; letter-spacing: .05em; }
+  .chk { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; font-weight: 600; margin-bottom: 22px; }
+  .box { width: 22px; height: 22px; border-radius: 6px; background: var(--jb-blue); color: #fff; display: grid; place-items: center; flex: none; }
+  .box svg.ic { width: 16px; height: 16px; }
+  .modal .btns { display: flex; gap: 12px; align-items: center; }
+  .modal .btns .sp { margin-left: auto; }
+</style></head>
+<body>
+<div class="page">
+<div id="app-header" data-nav="write"></div>
+<main class="main">
+  <div class="crumbs">Session setup <i data-ic="right"></i> Write a note <i data-ic="right"></i> <b>Review</b></div>
+  <div class="page-head">
+    <div><h1>Review your draft</h1><p class="lede">Jamie Rivera (synthetic) · Individual Therapy · 11/6/2026 2:05 PM ET · Progress note</p></div>
+    <div class="actions"><span class="small muted">Version 3 · Checked 11/6/2026 2:49 PM ET</span><button class="btn btn-outline btn-sm"><i data-ic="history"></i>Version history</button></div>
+  </div>
+  <div class="statusrow">
+    <div class="status meets"><i data-ic="check"></i>
+      <div><div class="t">Meets standards</div><div class="d">No Critical issues or Warnings. 1 Informational note to consider. Last checked 11/6/2026 2:49 PM ET.</div></div>
+      <div class="counts"><span><i data-ic="critical"></i>0 Critical</span><span><i data-ic="warning"></i>0 Warning</span><span><i data-ic="info"></i>1 Informational</span></div>
+    </div>
+    <div class="approve-box"><button class="btn btn-primary btn-lg"><i data-ic="tick"></i>Approve and finalize</button></div>
+  </div>
+  <div class="layout">
+    <section class="card editor">
+      <div class="editor-toolbar"><h3 style="font-size:18px">Note</h3><span class="sp blank-nav" style="background:var(--jb-green);color:#fff;padding-right:12px"><i data-ic="check"></i>&nbsp;No blanks left</span></div>
+      <div class="editor-body">
+        <div class="doc-title">Progress Note — Article 31 Outpatient Clinic</div>
+        <div class="sec">Assessment</div>
+        <p><a class="goal">G1</a> Progress toward reducing panic episodes: frequency reduced from 4x/week to 2x/week since the last session.</p>
+        <p><a class="goal">G2</a> Progress toward daily grounding practice: <span class="added">client reports using the 4-7-8 breathing technique on 5 of 7 days this week and logging triggers in the journal.</span></p>
+        <p><b>Intervention:</b> Reviewed diaphragmatic breathing and the 5-4-3-2-1 grounding method. Role-played applying the technique in a work-meeting scenario.</p>
+        <p><b>Client response:</b> <span class="added">Client demonstrated the 5-4-3-2-1 technique unprompted and identified two triggers where they intend to apply it (open-plan office noise, unexpected calendar invites).</span></p>
+        <div class="sec">Plan</div>
+        <p>Continue weekly individual therapy. Client to keep the trigger log. Next session in one week.</p>
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-head"><h2 style="font-size:22px">Issues</h2></div>
+      <div class="label">Resolved in version 3</div>
+      <div class="resolved"><i data-ic="check"></i>Client response to the intervention is missing<span class="rid mono">A31-RESPONSE-001</span></div>
+      <div class="resolved"><i data-ic="check"></i>No progress recorded for Goal G2<span class="rid mono">A31-GOALPROG-004</span></div>
+    </section>
+  </div>
+</main>
+<div class="scrim"></div>
+<div class="modal" role="dialog" aria-labelledby="t">
+  <span class="x"><i data-ic="x"></i></span>
+  <span class="badge-demo">Synthetic data – demo only</span>
+  <h2 id="t" style="margin-top:14px">Approve and finalize this note?</h2>
+  <p>Approving signs version 3 and locks it. The note is checked once more before it’s approved.</p>
+  <ul>
+    <li><i data-ic="shield"></i><span>If the final check finds a Critical issue, for example from an edit made after your last Re-assess, approval stops and the issue is shown.</span></li>
+    <li><i data-ic="lock"></i><span>Approved notes can’t be edited. Any later change is added as an addendum with its own version.</span></li>
+    <li><i data-ic="info"></i><span>1 Informational note is still open. It doesn’t block approval.</span></li>
+  </ul>
+  <div class="sig"><div class="k">Signature to be applied</div>Demo Clinician (synthetic) · Signed 11/6/2026 2:52 PM ET</div>
+  <label class="chk"><span class="box"><i data-ic="tick"></i></span>I reviewed this note, and it accurately reflects the session.</label>
+  <div class="btns">
+    <button class="btn btn-ghost">Cancel</button>
+    <button class="btn btn-primary btn-lg sp"><i data-ic="tick"></i>Approve and finalize</button>
+  </div>
+</div>
+</div>
+<script src="shell.js"></script>
+</body></html>

@@ -1,0 +1,92 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Write a note mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .layout { display: grid; grid-template-columns: 1fr 400px; gap: 24px; align-items: start; margin-top: 20px; }
+  .dict .textarea { min-height: 360px; }
+  .interim { color: #6f696b; font-style: italic; }
+  .dict-bar { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
+  .mic {
+    margin-left: 10px;
+    width: 56px; height: 56px; border-radius: 50%; background: var(--jb-red); color: #fff; display: grid; place-items: center;
+    box-shadow: 0 0 0 6px #fff, 0 0 0 9px var(--jb-red); border: none;
+  }
+  .mic svg.ic { width: 26px; height: 26px; }
+  .listening { display: flex; flex-direction: column; gap: 2px; }
+  .listening b { color: var(--jb-red); display: inline-flex; gap: 8px; align-items: center; }
+  .wave { display: inline-flex; gap: 3px; align-items: center; height: 18px; }
+  .wave i { width: 4px; border-radius: 2px; background: var(--jb-red); display: block; }
+  .dict-bar .sp { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+  .side h3 { margin-bottom: 10px; }
+  .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; counter-reset: s; }
+  .steps li { display: flex; gap: 12px; font-size: 14.5px; }
+  .steps li::before { counter-increment: s; content: counter(s); width: 24px; height: 24px; border-radius: 50%; background: var(--jb-green); color: #fff; font-weight: 700; font-size: 13px; display: grid; place-items: center; flex: none; }
+  .goalrow { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; padding: 10px 12px; border-radius: var(--jb-radius-sm); background: var(--jb-white-soft); margin-bottom: 10px; }
+</style></head>
+<body>
+<div id="app-header" data-nav="write"></div>
+<main class="main">
+  <div class="crumbs">Session setup <i data-ic="right"></i> <b>Write a note</b></div>
+  <div class="page-head">
+    <div>
+      <h1>Write a note</h1>
+      <p class="lede">Type or dictate what happened in the session. The assistant drafts the progress note in the Article 31 format and leaves anything you didn’t mention blank.</p>
+    </div>
+  </div>
+
+  <div class="context">
+    <div class="kv"><span class="k">Client</span><span class="v">Jamie Rivera (synthetic)</span></div>
+    <div class="kv"><span class="k">Date and time</span><span class="v">11/6/2026 2:05 PM ET</span></div>
+    <div class="kv"><span class="k">Service type</span><span class="v">Individual Therapy</span></div>
+    <div class="kv"><span class="k">Modality</span><span class="v">In-person</span></div>
+    <div class="kv"><span class="k">Duration</span><span class="v">45 min</span></div>
+    <div class="kv"><span class="k">Note type</span><span class="v">Progress note</span></div>
+    <div class="end"><span class="from-record"><i data-ic="record"></i>From record</span><a class="btn btn-ghost btn-sm">Change session</a></div>
+  </div>
+
+  <div class="layout">
+    <section class="card dict">
+      <div class="card-head"><h2>Session notes</h2><span class="sp hint small">Typed and dictated text go in the same box. You can edit at any time.</span></div>
+      <div class="textarea focus">Jamie reported panic episodes went from four times a week down to two since last session. Said they used the breathing technique twice this week and got through a work meeting without leaving the room.
+
+Calm and engaged the whole session, affect matched mood, on time, fully oriented. No acute distress.
+
+Reviewed diaphragmatic breathing and the 5-4-3-2-1 grounding method. We role-played using it in a work meeting scenario.
+
+<span class="interim">Plan is to continue weekly individual therapy and keep the trigger log, next session in one week</span><span class="caret"></span></div>
+      <div class="dict-bar">
+        <button class="mic" aria-label="Stop dictation"><i data-ic="mic"></i></button>
+        <div class="listening">
+          <b><span class="wave"><i style="height:8px"></i><i style="height:16px"></i><i style="height:11px"></i><i style="height:18px"></i><i style="height:7px"></i></span>Listening…</b>
+          <span class="small muted">Grey text is still being transcribed. Click the mic to stop.</span>
+        </div>
+        <div class="sp">
+          <span class="small muted">612 characters</span>
+          <button class="btn btn-primary btn-lg"><i data-ic="sparkle"></i>Draft note</button>
+        </div>
+      </div>
+      <div class="callout soft" style="margin-top:16px"><i data-ic="info"></i><span>Dictation uses your browser’s speech service (Chrome or Edge). If it isn’t available, the mic is hidden and you can type instead. Synthetic data only.</span></div>
+    </section>
+
+    <aside class="stack">
+      <section class="card side">
+        <h3>Treatment plan goals</h3>
+        <div class="goalrow"><span class="goal">G1</span><span>Reduce frequency of panic episodes from 4x/week to 1x/week</span></div>
+        <div class="goalrow" style="margin-bottom:0"><span class="goal">G2</span><span>Practice grounding technique daily and log triggers</span></div>
+        <p class="small muted" style="margin-top:10px">Mention progress on each goal. The draft links interventions and progress to these goals.</p>
+      </section>
+      <section class="card side">
+        <h3>When you click Draft note</h3>
+        <ol class="steps">
+          <li>The note is drafted in the Article 31 progress note format, with session details filled in.</li>
+          <li><span>Anything you didn’t say is left as <span class="notprov">[NOT PROVIDED]</span> and flagged. Nothing is made up.</span></li>
+          <li>The draft is checked against Article 31, Medicaid and NYS documentation rules.</li>
+          <li>You review the issues, answer follow-up questions, edit, and approve.</li>
+        </ol>
+      </section>
+    </aside>
+  </div>
+  <div class="mock-note"><span>UI mockup · Synthetic data only</span><span>Draft note → one <code>POST /draft</code> call (draft + rule checks + content checks + follow-up questions).</span></div>
+</main>
+<script src="shell.js"></script>
+</body></html>

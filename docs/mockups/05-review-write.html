@@ -1,0 +1,151 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Review screen (Write) mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .cmp { font-family: Consolas, monospace; font-size: 12px; font-weight: 700; color: var(--jb-purple); border: 1.5px dashed var(--jb-purple); border-radius: 6px; padding: 2px 7px; background: #fff; letter-spacing: 0; }
+  .statusrow { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: center; margin-bottom: 22px; }
+  .approve-box { display: flex; align-items: center; gap: 14px; background: #fff; border: 1px solid var(--jb-border); border-radius: var(--jb-radius-lg); padding: 12px 14px 12px 20px; box-shadow: 0 2px 8px rgba(35,31,32,.06); }
+  .approve-box .why { font-size: 13.5px; max-width: 220px; }
+  .layout { display: grid; grid-template-columns: 1fr 560px; gap: 24px; align-items: start; }
+  .editor { padding: 0; }
+  .issues h2, .fqs h2 { font-size: 22px; }
+  .tagcheck { font-size: 11.5px; font-weight: 700; border-radius: 6px; padding: 2px 7px; display: inline-flex; gap: 4px; align-items: center; }
+  .tagcheck.rule { background: var(--jb-white-soft); color: var(--jb-black); }
+  .tagcheck.ai { background: var(--jb-green); color: #fff; }
+  .tagcheck svg.ic { width: 12px; height: 12px; vertical-align: 0; }
+  .ver { display: flex; gap: 10px; align-items: center; }
+</style></head>
+<body>
+<div id="app-header" data-nav="write"></div>
+<main class="main">
+  <div class="crumbs">Session setup <i data-ic="right"></i> Write a note <i data-ic="right"></i> <b>Review</b></div>
+  <div class="page-head">
+    <div>
+      <h1>Review your draft</h1>
+      <p class="lede">Jamie Rivera (synthetic) · Individual Therapy · 11/6/2026 2:05 PM ET · Progress note</p>
+    </div>
+    <div class="actions ver">
+      <span class="small muted">Version 1 · Drafted 11/6/2026 2:41 PM ET</span>
+      <button class="btn btn-outline btn-sm"><i data-ic="history"></i>Version history</button>
+    </div>
+  </div>
+
+  <div class="statusrow">
+    <div style="position:relative">
+      <div class="status needs">
+        <i data-ic="critical"></i>
+        <div><div class="t">Needs attention</div><div class="d">Fix the Critical issue before you approve. Last checked 11/6/2026 2:41 PM ET.</div></div>
+        <div class="counts">
+          <span><i data-ic="critical"></i>1 Critical</span><span><i data-ic="warning"></i>1 Warning</span><span><i data-ic="info"></i>1 Informational</span>
+        </div>
+        <span class="cmp" style="margin-left:auto">StatusBanner</span>
+      </div>
+    </div>
+    <div class="approve-box">
+      <span class="why muted">Approve unlocks when no Critical issues are open.</span>
+      <button class="btn btn-disabled btn-lg" aria-disabled="true"><i data-ic="lock"></i>Approve and finalize</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <section class="card editor">
+      <div class="editor-toolbar">
+        <h3 style="font-size:18px">Note</h3><span class="cmp">NoteEditor</span>
+        <span class="small"><span class="edited-dot"></span> Edited since last check</span>
+        <span class="sp blank-nav"><i data-ic="flag"></i>&nbsp;2 blanks · 1 of 2<span class="arr"><i data-ic="up"></i></span><span class="arr"><i data-ic="down"></i></span></span>
+      </div>
+      <div class="editor-body">
+        <div class="doc-title">Progress Note — Article 31 Outpatient Clinic</div>
+        <div class="meta">
+          <span><b>Client:</b> Jamie Rivera (synthetic) — ART31-C001</span><span><b>Service type:</b> Individual Therapy</span>
+          <span><b>Date of service:</b> 11/6/2026 2:05 PM ET</span><span><b>Modality:</b> In-person</span>
+          <span><b>Clinician:</b> Demo Clinician (synthetic)</span><span><b>Duration:</b> 45 minutes</span>
+          <span class="from-record" style="grid-column:1/3;margin-top:4px"><i data-ic="record"></i>From the session record. Not editable here.</span>
+        </div>
+
+        <div class="sec">Subjective</div>
+        <p>Client reported panic episodes decreased from 4x/week to 2x/week since the last session. Client stated they used the breathing technique twice this week and got through a work meeting without leaving the room.</p>
+
+        <div class="sec">Objective</div>
+        <p>Client appeared calm and engaged throughout the session. Affect congruent with mood. Attended on time, fully oriented. No acute distress observed.</p>
+
+        <div class="sec">Assessment</div>
+        <p><a class="goal">G1</a> Progress toward reducing panic episodes: frequency reduced from 4x/week to 2x/week since the last session.</p>
+        <p><a class="goal">G2</a> Progress toward daily grounding practice: <span class="notprov"><i data-ic="flag"></i>[NOT PROVIDED]</span></p>
+        <p><b>Intervention:</b> Reviewed diaphragmatic breathing and the 5-4-3-2-1 grounding method. Role-played applying the technique in a work-meeting scenario. <a class="goal">G1</a> <a class="goal">G2</a></p>
+        <p><b>Client response:</b> <span class="notprov active"><i data-ic="flag"></i>[NOT PROVIDED]</span></p>
+
+        <div class="sec">Plan</div>
+        <p>Continue weekly individual therapy. Client to keep the trigger log. Next session in one week.<span class="caret"></span></p>
+
+        <div class="sec">Signature</div>
+        <p class="muted">Your signature, credentials and the date and time are added when you approve.</p>
+      </div>
+      <div class="editor-foot">
+        <button class="btn btn-blue btn-lg"><i data-ic="refresh"></i>Re-assess</button>
+        <span class="small" style="max-width:420px">Saves your edits and <b>1 follow-up answer</b> as version 2, then checks the note again. Nothing is re-checked until you click.</span>
+        <span class="sp cmp">Re-assess button</span>
+      </div>
+    </section>
+
+    <div class="stack">
+      <section class="card issues">
+        <div class="card-head"><h2>Issues</h2><span class="cmp">IssuesPanel</span><span class="sp small muted">Click an issue to jump to it</span></div>
+
+        <div class="group-head"><span class="sev critical"><i data-ic="critical"></i>Critical</span><span class="n">Must fix · 1</span></div>
+        <div class="issue critical selected">
+          <div class="top"><span class="what">Client response to the intervention is missing</span><span class="el">Client response</span></div>
+          <dl>
+            <dt>Requirement</dt><dd>Progress notes must describe the client’s response to the services provided.</dd>
+            <dt>Source</dt><dd><a class="src">14 NYCRR Part 599 · §599.11 Clinical records <i data-ic="ext"></i></a></dd>
+            <dt>How to fix</dt><dd>Describe how the client responded to the breathing and grounding practice. See follow-up question 1.</dd>
+          </dl>
+          <div class="foot"><a><i data-ic="right"></i>Go to text</a><span class="tagcheck rule"><i data-ic="shield"></i>Rule check</span><span class="rid mono">A31-RESPONSE-001</span></div>
+        </div>
+
+        <div class="group-head"><span class="sev warning"><i data-ic="warning"></i>Warning</span><span class="n">Should fix · 1</span></div>
+        <div class="issue warning">
+          <div class="top"><span class="what">No progress recorded for Goal G2</span><span class="el">Goal progress</span></div>
+          <dl>
+            <dt>Requirement</dt><dd>Notes should record progress toward each treatment plan goal addressed in the session.</dd>
+            <dt>Source</dt><dd><a class="src">14 NYCRR Part 599 · §599.11 Clinical records <i data-ic="ext"></i></a></dd>
+            <dt>How to fix</dt><dd>Add how often the client practiced grounding and logged triggers, or remove G2 from this session.</dd>
+          </dl>
+          <div class="foot"><a><i data-ic="right"></i>Go to text</a><span class="tagcheck ai"><i data-ic="sparkle"></i>Content check</span><span class="rid mono">A31-GOALPROG-004</span></div>
+        </div>
+
+        <div class="group-head"><span class="sev info"><i data-ic="info"></i>Informational</span><span class="n">Optional · 1</span></div>
+        <div class="issue info">
+          <div class="top"><span class="what">Medical necessity could be clearer</span><span class="el">Medical necessity</span></div>
+          <dl>
+            <dt>Requirement</dt><dd>Medicaid-billed services must be documented as medically necessary.</dd>
+            <dt>Source</dt><dd><a class="src">18 NYCRR §504.3 Provider records <i data-ic="ext"></i></a></dd>
+            <dt>How to fix</dt><dd>Consider a sentence linking today’s intervention to the symptoms in the treatment plan.</dd>
+          </dl>
+          <div class="foot"><a><i data-ic="right"></i>Go to text</a><span class="tagcheck ai"><i data-ic="sparkle"></i>Content check</span><span class="rid mono">MED-NECESSITY-002</span></div>
+        </div>
+      </section>
+
+      <section class="card fqs">
+        <div class="card-head"><h2>Follow-up questions</h2><span class="cmp">FollowUpQuestions</span></div>
+        <div class="fq">
+          <div class="q"><span class="qmark">1</span>How did the client respond to the breathing and grounding intervention?</div>
+          <div class="ctx">Fills: Client response · A31-RESPONSE-001</div>
+          <div class="ans filled">Jamie did the 5-4-3-2-1 technique on their own without prompting and named two triggers where they plan to use it: open-plan office noise and unexpected calendar invites. Said they feel more confident handling anxiety.</div>
+          <div class="readonly" style="color:var(--jb-green)"><i data-ic="check"></i>Answered. Sent with your next Re-assess.</div>
+        </div>
+        <div class="fq">
+          <div class="q"><span class="qmark">2</span>How often did the client practice grounding and log triggers this week?</div>
+          <div class="ctx">Fills: Goal G2 progress · A31-GOALPROG-004</div>
+          <div class="ans empty">Type your answer. Leave it blank if it wasn’t discussed.</div>
+        </div>
+        <div class="hint small"><i data-ic="info"></i><span>There’s no separate submit. Answers go with your next <b>Re-assess</b>, and your edits to the note are kept.</span></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="versions"><span>Prompt <code>draft.md</code> v1.0</span><span>Rules <code>article31.yaml</code> v0.3</span><span>Knowledge base manifest <code>3f9a2c1</code></span><span>Note ID <code>n-0142</code></span></div>
+  <div class="mock-note"><span>UI mockup · Synthetic data only · Rule IDs and citations are placeholders until <code>rules/article31.yaml</code> is final</span></div>
+</main>
+<script src="shell.js"></script>
+</body></html>

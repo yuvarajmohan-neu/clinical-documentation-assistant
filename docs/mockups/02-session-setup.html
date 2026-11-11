@@ -1,0 +1,94 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Session setup mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mockup.css">
+<style>
+  .layout { display: grid; grid-template-columns: 1fr 420px; gap: 24px; align-items: start; }
+  .programs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .prog { border: 1.5px solid var(--jb-border); border-radius: var(--jb-radius-md); padding: 14px; display: flex; flex-direction: column; gap: 10px; min-height: 118px; background: #fff; }
+  .prog .nm { font-weight: 700; font-size: 15px; line-height: 1.25; }
+  .prog .ty { font-size: 13px; color: #5b5557; }
+  .prog.on { border: 2.5px solid var(--jb-orange); }
+  .prog.dis { background: var(--jb-white-soft); color: #8a8486; }
+  .prog.dis .nm { color: #8a8486; }
+  .prog .top { display: flex; align-items: center; gap: 8px; }
+  .prog .top .lockt { margin-left: auto; font-size: 12px; display: inline-flex; gap: 4px; align-items: center; }
+  .prog .top .lockt svg.ic { width: 14px; height: 14px; }
+  .filters { display: flex; gap: 12px; margin-bottom: 14px; }
+  .filters .input { flex: 1; color: #8a8486; }
+  .detail .row { display: grid; grid-template-columns: 130px 1fr; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--jb-border); font-size: 15px; }
+  .detail .row:last-of-type { border-bottom: none; }
+  .detail .row .k { color: #5b5557; font-weight: 600; font-size: 14px; }
+  .goals { margin-top: 14px; display: grid; gap: 10px; }
+  .goalrow { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; padding: 10px 12px; border-radius: var(--jb-radius-sm); background: var(--jb-white-soft); }
+  .goalrow .due { font-size: 13px; color: #5b5557; display: block; margin-top: 2px; }
+  .next { display: grid; gap: 12px; margin-top: 20px; }
+  .next .btn { justify-content: flex-start; }
+  .next .btn .sub { font-weight: 400; font-size: 13px; display: block; }
+  .next .btn > span { display: flex; flex-direction: column; align-items: flex-start; }
+  .next .btn svg.ic:last-child { margin-left: auto; }
+</style></head>
+<body>
+<div id="app-header" data-nav="setup"></div>
+<main class="main">
+  <div class="page-head">
+    <div>
+      <h1>Set up your session</h1>
+      <p class="lede">Choose a program and a session. The session’s details are carried into your note so you don’t have to retype them.</p>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="stack">
+      <section class="card">
+        <div class="card-head"><span class="step-num">1</span><h2>Program</h2>
+          <span class="sp hint small"><i data-ic="info"></i>Only shown when your role covers more than one program. Otherwise it is set for you.</span></div>
+        <div class="programs">
+          <div class="prog dis"><div class="top"><span class="radio"></span><span class="lockt"><i data-ic="lock"></i>No access</span></div><span class="nm">Adult ACT</span><span class="ty">Assertive Community Treatment</span></div>
+          <div class="prog dis"><div class="top"><span class="radio"></span><span class="lockt"><i data-ic="lock"></i>No access</span></div><span class="nm">Youth ACT</span><span class="ty">Assertive Community Treatment</span></div>
+          <div class="prog"><div class="top"><span class="radio"></span></div><span class="nm">Health Home Care Coordination</span><span class="ty">Care management</span></div>
+          <div class="prog dis"><div class="top"><span class="radio"></span><span class="lockt"><i data-ic="lock"></i>No access</span></div><span class="nm">Apartment Treatment Housing</span><span class="ty">Residential</span></div>
+          <div class="prog on"><div class="top"><span class="radio on"></span></div><span class="nm">Article 31 Outpatient Clinic</span><span class="ty">Therapy visits</span></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><span class="step-num">2</span><h2>Session</h2>
+          <span class="sp tag">Article 31 · 2 sessions</span></div>
+        <div class="filters">
+          <div class="input"><i data-ic="search"></i>Search by client name or ID</div>
+          <div class="select" style="width:220px">Last 30 days</div>
+        </div>
+        <table class="list">
+          <thead><tr><th style="width:44px"></th><th>Client</th><th>Date and time</th><th>Service type</th><th>Modality</th><th>Duration</th><th>Goals</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr class="sel"><td><span class="radio on"></span></td><td><b>Jamie Rivera (synthetic)</b><br><span class="muted small mono">ART31-C001</span></td><td>11/6/2026 2:05 PM ET</td><td>Individual Therapy</td><td>In-person</td><td>45 min</td><td><span class="goal">G1</span> <span class="goal">G2</span></td><td><span class="tag">Not started</span></td></tr>
+            <tr><td><span class="radio"></span></td><td><b>Morgan Lee (synthetic)</b><br><span class="muted small mono">ART31-C002</span></td><td>10/30/2026 2:30 PM ET</td><td>Individual Therapy</td><td>Telehealth</td><td>50 min</td><td><span class="goal">G1</span></td><td><span class="tag">Not started</span></td></tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <aside class="card detail">
+      <div class="card-head"><h2>Selected session</h2></div>
+      <div class="from-record" style="margin-bottom:8px"><i data-ic="record"></i>Pre-filled from the synthetic session record</div>
+      <div class="row"><span class="k">Client</span><span><b>Jamie Rivera (synthetic)</b><br><span class="mono muted">ART31-C001</span></span></div>
+      <div class="row"><span class="k">Date and time</span><span>11/6/2026 2:05 PM ET</span></div>
+      <div class="row"><span class="k">Service type</span><span>Individual Therapy</span></div>
+      <div class="row"><span class="k">Modality</span><span>In-person</span></div>
+      <div class="row"><span class="k">Duration</span><span>45 minutes</span></div>
+      <div class="row"><span class="k">Note type</span><span>Progress note (SOAP)</span></div>
+      <div class="label" style="margin-top:16px">Treatment plan goals</div>
+      <div class="goals">
+        <div class="goalrow"><span class="goal">G1</span><span>Reduce frequency of panic episodes from 4x/week to 1x/week<span class="due">Target 2/1/2027 · Active</span></span></div>
+        <div class="goalrow"><span class="goal">G2</span><span>Practice grounding technique daily and log triggers<span class="due">Target 12/15/2026 · Active</span></span></div>
+      </div>
+      <div class="next">
+        <button class="btn btn-primary btn-lg"><i data-ic="pen"></i><span>Write a note<span class="sub">Type or dictate session notes, then draft</span></span><i data-ic="right"></i></button>
+        <button class="btn btn-outline btn-lg"><i data-ic="paste"></i><span>Check a note<span class="sub">Paste a note written somewhere else</span></span><i data-ic="right"></i></button>
+      </div>
+    </aside>
+  </div>
+  <div class="mock-note"><span>UI mockup · Synthetic data only</span><span>Program is locked automatically for users with a single program role (e.g. <code>art31.clinician</code>); step 1 is then hidden.</span></div>
+</main>
+<script src="shell.js"></script>
+</body></html>
