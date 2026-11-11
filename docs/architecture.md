@@ -61,7 +61,7 @@ flowchart TB
   S1["1. Pick program + session<br/>client, date, time pre-filled"]:::human
   S2["2. Write page: type or dictate notes"]:::human
   S3["3. Draft the note<br/>gaps = NOT PROVIDED, flagged"]:::ai
-  S4["4. Check the draft<br/>see Diagram A3"]:::rules
+  S4["4. Check the draft (same call as step 3)<br/>see Diagram A3"]:::rules
   S5["5. Issues + follow-up questions"]
   S6["6. Clinician edits and answers"]:::human
   S7["7. Status shown<br/>Meets standards / Needs attention"]
@@ -72,7 +72,7 @@ flowchart TB
   S6 --> S7 --> S8
 ```
 
-Diagram A2 shows the **Write a note** page. Notes written elsewhere go through the separate **Check a note** page: the clinician pastes the note, step 3 (drafting) is skipped, and it goes straight to step 4. From step 5 onward both pages use the same review screen (editor, issues panel, status, approve).
+Diagram A2 shows the **Write a note** page. Steps 3 and 4 are one orchestrated `POST /draft` call from the frontend's perspective, not two separate frontend-triggered steps — the backend runs drafting, the rule engine, the content checker and follow-up generation together and returns it all at once. The same is true of the step 6 → step 4 "Re-assess" loop: one `POST /assess` call carries the clinician's edited note text and follow-up answers together, and the backend saves and re-checks both in that single request. Notes written elsewhere go through the separate **Check a note** page: the clinician pastes the note, step 3 (drafting) is skipped, and it goes straight to step 4. From step 5 onward both pages use the same review screen (editor, issues panel, status, approve).
 
 ### Diagram A3: Prototype, how a draft is checked
 
@@ -239,11 +239,12 @@ The pipeline runs offline with `python -m backend.kb.ingest`. It is re-run whene
 |---|---|---|
 | `GET /programs` | List programs and their frameworks | frameworks |
 | `GET /sessions?program=` | Synthetic sessions with client, date/time, service type, modality and treatment plan goals | 7 |
-| `POST /draft` | Session + clinician text → a Draft that is pre-filled, follows the program format, links to goals, and flags blanks | 5–9 |
-| `POST /assess` | Draft or pasted note → deterministic and LLM issues, followed by overall status | 10–13, 16 |
-| `POST /followups` | Issues → follow-up questions. Answers are fed back into `/draft` | 14 |
+| `POST /draft` | Session + clinician text → **one orchestrated call**: drafts the note (pre-filled, program format, linked to goals, blanks flagged), then internally runs the rule engine + content checker and generates the first round of follow-up questions. Returns `{note_id, draft_text, issues[], followup_questions[]}` in one response. This is the **only** call the Write page's initial "Draft" action makes — the frontend never calls `/assess` separately after it. | 5–9, 10–13, 14 |
+| `POST /assess` | Draft or pasted note → deterministic and LLM issues, followed by overall status. On the Write page this is also the **single call behind the Re-assess button** for every edit/follow-up loop after the initial draft: it takes the clinician's current `NoteEditor` text plus the current follow-up answers in one request, persists both as a new version (note edit and follow-up answers both land in the audit log), then internally re-runs the draft-merge step (the LLM decides how to incorporate the answers, treating the submitted `NoteEditor` text as authoritative — never silently discarded or regenerated from the original session input), the rule engine, the content checker, and follow-up generation. Returns `{draft_text, issues[], followup_questions[], status}` together; the UI updates `NoteEditor` only if `draft_text` differs from what was submitted. On the Check page it is called directly with no prior `/draft` call, same response shape minus the draft-merge step (nothing to merge against). | 10–13, 14, 16 |
 | `PUT /notes/{id}` | Save clinician edits as a new version | 15 |
-| `POST /notes/{id}/approve` | Approve. Blocked while any Critical issue is open; the clinician sees the status and confirms | 15–16 |
+| `POST /notes/{id}/approve` | Approve. Re-assesses server-side before approving and returns 409 while any Critical issue is open — intentional, since nothing auto-reassesses on keystroke and the client's last-known status can go stale if the clinician edits after their last Re-assess. The clinician sees the status and confirms. | 15–16 |
+
+`/followups` is not a separate route the frontend calls — follow-up generation is an internal step inside `/draft` and `/assess`, described above.
 
 - Overall status rule: any open Critical issue → **Needs attention**. No Critical issues but some Warnings → **Meets standards with warnings**. Otherwise → **Meets standards**.
 - **Postgres** (SQLModel; a native local install or managed instance with the `pgvector` extension enabled) stores `notes`, `note_versions`, the KB chunks, and an append-only `audit_log` with actor, action, timestamp and versions.
@@ -262,15 +263,16 @@ The pipeline runs offline with `python -m backend.kb.ingest`. It is re-run whene
   | Session | Session picker, required; pre-fills the draft | Optional date-of-service field |
   | Note type | Set by the session or program | Selector: progress note or treatment plan update |
   | Input | Text area with a mic button (Web Speech API, text fallback) | Large paste area, no mic |
-  | Backend | `POST /draft`, then `POST /assess` | `POST /assess` only |
-  | Follow-up answers | Answer box; re-runs `/followups` then `/draft` | Display-only question, no answer box; clinician edits the note directly, then re-assesses |
+  | Backend | One `POST /draft` call (orchestrates draft + checks + follow-ups server-side) | `POST /assess` only |
+  | Follow-up answers | Typed into the answer box; no separate submit — carried along with the next **Re-assess** click, which sends note text + answers together | Display-only question, no answer box; clinician edits the note directly, then re-assesses |
 
 - **Shared review screen**, used by both pages and built once: note editor in which blank or flagged sections are highlighted → issues panel grouped by severity, each issue showing requirement, source link and fix → follow-up questions → status banner → **Re-assess** and **Approve** buttons, plus a version drawer. Each page is a thin wrapper that collects input differently, then hands off to this screen. A shared `useNoteReview` hook holds the note, issues, status and approval state.
 - The input components are `DictationBox` (Write page) and `PasteBox` (Check page). Each page keeps its own text state.
-- **Re-assess button:** sits with the note editor. Manually triggers `POST /assess` on the current saved note text. Nothing is re-checked automatically on every edit or keystroke; the clinician edits, saves, then clicks Re-assess.
-- **Approve button:** doubles as the save/finalize action (`POST /notes/{id}/approve`). Disabled on the client while any Critical issue is open; the 409 from the server is the real gate.
-- **Check page follow-up questions are display-only.** No answer input box. The clinician reads the question, edits the pasted note in `NoteEditor` directly to address it, then clicks Re-assess. (Write page follow-ups keep their answer box, since answers feed `/followups` → `/draft`.)
-- Open API questions for P3: does `/assess` on pasted text return a `note_id` (needed for edit and approve), is `note_type` a request field, and is `session_id` optional on `/assess`.
+- **Draft button** (Write page only, first action): calls `POST /draft` once. Populates `NoteEditor`, `IssuesPanel`, and the follow-up questions from the single response — there is no follow-up frontend call to `/assess`.
+- **Re-assess button:** the only other network-triggering action before Approve, and it is backed by a single `POST /assess` call, not a client-side chain of separate save/assess/follow-up calls. It sends the clinician's current `NoteEditor` text plus current follow-up answers in one request; the backend persists both as a new version and returns updated draft/issues/follow-ups. There is no separate "Save" button — nothing is re-checked automatically on every edit or keystroke, so the clinician edits (and optionally answers follow-ups), then clicks Re-assess to save and re-check together.
+- **Approve button:** doubles as the save/finalize action (`POST /notes/{id}/approve`). Disabled on the client while any Critical issue is open; the 409 from the server is the real gate. The server re-assessing on approve is intentional, not redundant: it catches edits made after the clinician's last Re-assess click, so the approved text and the assessment that cleared it are always the same version. (Considered and rejected tracking client-side "dirty since last Re-assess" state to pre-emptively disable Approve — the server-side check is sufficient.)
+- **Check page follow-up questions are display-only.** No answer input box. The clinician reads the question, edits the pasted note in `NoteEditor` directly to address it, then clicks Re-assess. (Write page follow-ups keep their answer box, folded into the Re-assess call as described above.)
+- `/draft` and `/assess` share a common response shape: `draft_text`, `issues[]`, `followup_questions[]`, plus `note_id`/`status` as applicable (see §2.4).
 - The JB brand skill supplies the logo, colors and fonts as CSS variables. A permanent "SYNTHETIC DATA – DEMO ONLY" badge is shown.
 
 ### 2.6 Synthetic data (req 23)

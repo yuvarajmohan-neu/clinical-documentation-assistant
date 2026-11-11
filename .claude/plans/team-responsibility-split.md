@@ -17,10 +17,10 @@ Note: P4's only external dependency is P2's `kb_chunks`/`kb_documents` table sha
 2. **Shared types** in `backend/providers/types.py`: `Passage`, `Principal`, `Issue` (exact schema from CLAUDE.md req 21), `Program` enum, `NoteDraft`, `Assessment` (status, issues[], prompt_version, ruleset_version, kb_manifest_hash).
 3. **OpenAPI contract** `docs/api.yaml`:
    - `GET /programs`, `GET /sessions?program=`, `GET /sessions/{id}`
-   - `POST /draft` → `{note_id, draft_text, blanks[]}`
-   - `POST /assess` → `{status, issues[]}` (draft or pasted text)
-   - `POST /followups` → `{questions[]}`
-   - `PUT /notes/{id}`, `POST /notes/{id}/approve` (409 while a Critical is open)
+   - `POST /draft` → single orchestrated call: drafts the note, then internally runs the rule engine, content checker, and follow-up generation. Returns `{note_id, draft_text, issues[], followup_questions[]}`. This is the only call the Write page's initial Draft action makes.
+   - `POST /assess` → `{draft_text, issues[], followup_questions[], status}` (draft or pasted text). On the Write page, this is also the single call behind the **Re-assess** button for every subsequent loop: request carries the clinician's current note text plus current follow-up answers together; the backend persists both as a new version (both land in the audit log), then re-runs draft-merge (LLM decides how to incorporate answers, treating the submitted note text as authoritative), rule engine, content checker, and follow-up generation, in that one request.
+   - `/followups` is not a frontend-facing route — follow-up generation happens only as an internal step inside `/draft` and `/assess`.
+   - `PUT /notes/{id}`, `POST /notes/{id}/approve` (409 while a Critical is open — approve re-assesses server-side on purpose, since nothing auto-reassesses on keystroke and the client's last-known status can go stale after further edits)
    - `GET /notes/{id}/versions`, `GET /audit?note_id=`
 4. **DB schema** (proposed by P2, signed off by all): `notes`, `note_versions`, `assessments`, `audit_log`, `kb_documents`, `kb_chunks`.
 5. **Provider ABCs** in `backend/providers/<cap>/base.py`: `LLMProvider.complete_structured`, `SearchProvider.search(query, programs, k) -> list[Passage]`, `AuditProvider.record(event)`, `AuthProvider.verify(token) -> Principal`.
@@ -40,13 +40,13 @@ Note: P4's only external dependency is P2's `kb_chunks`/`kb_documents` table sha
   1. `ProgramSelector.tsx`: five programs; locked when the signed-in role (dev stub by default, Keycloak if the stretch is built) implies the program.
   2. Session picker: lists synthetic sessions and pre-fills client, date, time, service type and modality (12-hour ET).
   3. **Two pages** under one app shell: **Write a note** (`pages/WriteNote.tsx`) and **Check a note** (`pages/CheckNote.tsx`). Separate pages, no mode toggle.
-     - `DictationBox.tsx` (Write page): type or **dictate** with the browser Web Speech API (interim text, unsupported-browser fallback). Calls `/draft` then `/assess`.
+     - `DictationBox.tsx` (Write page): type or **dictate** with the browser Web Speech API (interim text, unsupported-browser fallback). Calls `/draft` only — the backend orchestrates checks and follow-ups internally, so there is no separate frontend call to `/assess` right after.
      - `PasteBox.tsx` (Check page): paste a finished note, pick the note type, optional date of service. Calls `/assess` only.
      - Both pages hand off to the same shared review screen (items 4–7 below), driven by one `useNoteReview` hook.
-  4. `NoteEditor.tsx` (shared): editable draft or pasted note, `[NOT PROVIDED]` blanks highlighted and navigable, goal links visible, save via `PUT /notes/{id}`.
-  5. `IssuesPanel.tsx`: per issue, what's wrong, the requirement with a clickable source, how to fix it, and a severity badge (icon plus colour, not colour alone). Click an issue to jump to the text. Follow-up questions with answer boxes that feed back into the draft.
+  4. `NoteEditor.tsx` (shared): editable draft or pasted note, `[NOT PROVIDED]` blanks highlighted and navigable, goal links visible. No standalone save button — edits are persisted as part of the Re-assess call (item 5), which performs save-then-recheck atomically.
+  5. `IssuesPanel.tsx`: per issue, what's wrong, the requirement with a clickable source, how to fix it, and a severity badge (icon plus colour, not colour alone). Click an issue to jump to the text. Follow-up questions with answer boxes (Write page only) — no separate submit button; answers are sent together with the note text on the next **Re-assess** click (single `POST /assess` call that saves both and returns updated draft/issues/follow-ups).
   6. `StatusBanner.tsx`: Meets standards / Meets standards with warnings / Needs attention, shown before finalization.
-  7. Approve flow: confirm dialog, button disabled while a Critical is open, version history drawer.
+  7. Approve flow: confirm dialog, button disabled while a Critical is open, version history drawer. The server re-assesses on approve by design (catches edits made after the last Re-assess click) — not a redundant call.
   8. `src/auth/`: dev-stub sign-in by default (no redirect needed), bearer token on every call, role → program; `react-oidc-context` against Keycloak is an optional stretch swap.
 - Loading, empty and error states; keyboard and screen-reader accessibility.
 
@@ -95,9 +95,9 @@ Note: P4's only external dependency is P2's `kb_chunks`/`kb_documents` table sha
 - `app/main.py` and `api/` routers per the OpenAPI contract; error model; CORS for Vite; settings from env; `providers/registry.py` choosing adapters from `*_PROVIDER` settings.
 - `providers/llm/`: `base.py`, `anthropic.py` (use the **claude-api skill** for current model ids and structured output), `azure_foundry.py` stub, `fake.py` for tests and offline demos. Claude is reachable only through `complete_structured(prompt_id, vars, schema)`.
 - `prompts/draft.md`, `assess_content.md`, `followup.md` with version front matter; every output records the prompt version.
-- `services/draft.py`: loads session and program framework, retrieves passages via P4's `SearchProvider`, calls Claude, pre-fills known fields, links interventions to treatment plan goals, sets gaps to `[NOT PROVIDED]` and returns `blanks[]`. Enforces "no invented clinical content".
-- `services/assess.py`: runs P3's own `RuleEngine` and `ContentChecker` (Claude, grounded in passages retrieved through P4's `SearchProvider`), merges and de-duplicates issues, validates against the `Issue` schema, computes status.
-- `services/followup.py`: turns gaps and issues into targeted questions.
+- `services/draft.py`: loads session and program framework, retrieves passages via P4's `SearchProvider`, calls Claude, pre-fills known fields, links interventions to treatment plan goals, sets gaps to `[NOT PROVIDED]` and returns `blanks[]`. Enforces "no invented clinical content". `POST /draft`'s handler calls this, then `assess.py`, then `followup.py` in sequence within the same request, returning `{note_id, draft_text, issues[], followup_questions[]}` — `/draft` is the only call the Write page's initial Draft action makes.
+- `services/assess.py`: runs P3's own `RuleEngine` and `ContentChecker` (Claude, grounded in passages retrieved through P4's `SearchProvider`), merges and de-duplicates issues, validates against the `Issue` schema, computes status. `POST /assess`'s handler is also what the Write page's **Re-assess** button calls: given note text plus follow-up answers, it persists both as a new version (`PUT`-equivalent save folded into the same request), reruns `draft.py`'s merge step (LLM decides how to incorporate the answers, treating the submitted note text as authoritative), then this service, then `followup.py` — one request, one response with the same shape as `/draft`.
+- `services/followup.py`: turns gaps and issues into targeted questions. Not exposed as its own frontend-facing route — it's an internal step called from both `draft.py`'s and `assess.py`'s request handlers.
 - Approve gate: `POST /notes/{id}/approve` re-assesses and returns 409 while a Critical is open; every action writes to the audit log.
 - Versioning stamped on every draft and assessment: prompt version, rule-set version, KB manifest hash.
 - Tests: status computation, ET time, approve-blocked-on-Critical, LLM output schema validation.

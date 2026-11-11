@@ -57,7 +57,9 @@ need data/config changes, not new UI code.
 - **The disabled Approve button is a convenience, not the gate.** The server's 409 (Critical issue
   open) is authoritative; don't skip handling that response just because the button is disabled.
 - **No auto re-check.** `/assess` only re-runs when the clinician clicks Re-assess — never on
-  keystroke or on every edit.
+  keystroke or on every edit. Re-assess is a single call that saves the current note text (and any
+  follow-up answers) and re-checks in one request — there's no separate "Save" action to call
+  first.
 - **Status wording** must exactly match the backend: any open Critical → "Needs attention"; only
   Warnings → "Meets standards with warnings"; otherwise → "Meets standards". Confirm this is still
   the backend's canonical three-way split before wiring `StatusBanner` (root CLAUDE.md lists only
@@ -71,9 +73,10 @@ need data/config changes, not new UI code.
 
 ## API contract
 Typed client should be generated from `../docs/api.yaml` once P3 publishes it; until then develop
-against P3's mock server. Known open questions to confirm before relying on exact shapes: whether
-`/assess` on pasted text returns a `note_id`, whether `note_type` is a request field, whether
-`session_id` is optional on `/assess`. See walkthrough §2/§8.2 for the full list.
+against P3's mock server. `/draft` and `/assess` share one response shape: `draft_text`, `issues[]`,
+`followup_questions[]`, plus `note_id`/`status` as applicable (see `../docs/architecture.md`
+§2.4/§2.5). The Write page's Draft button calls `/draft` only; the Re-assess button calls `/assess`
+only, carrying note text + follow-up answers together — there is no frontend call to `/followups`.
 
 ## Testing
 Every new page/component gets at least one Vitest + Testing Library test co-located as
