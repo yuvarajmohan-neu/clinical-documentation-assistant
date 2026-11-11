@@ -1,0 +1,12 @@
+# Health Home Care Coordination (NYS DOH Medicaid Health Home) source documents. Approved by user 2026-11-11.
+# date = PDF modification date (verify against health.ny.gov before relying on it).
+program: health-home
+documents:
+  - id: hh-standards
+    title: Health Home Standards and Requirements for Health Homes, Care Management Agencies, and MCOs (updated May 1, 2022)
+    url: https://healthweb-back.health.ny.gov/health_care/medicaid/program/medicaid_health_homes/docs/hh_mco_cm_standards.pdf
+    file: hh-standards.pdf
+    date: "2022-11-17"
+    version: "May 2022"
+    sha256: 7b761f8490d2468ccb7889bfa3064e1fa30812193ef4be6295a14057d7481768
+    use: plan of care within 60 days of enrollment; annual reassessment; CANS-NY every 6 months (children)

@@ -1,0 +1,29 @@
+# Apartment Treatment (OMH licensed residential program, 14 NYCRR Part 595) source documents. Approved by user 2026-11-11.
+# date = PDF modification date, or the retrieval date for web pages (verify against the official NYCRR before relying on it).
+# No Apartment Treatment-specific guideline document was found; Part 595 is the governing regulation.
+program: apartment-treatment
+documents:
+  - id: part595-11
+    title: 14 NYCRR 595.11 Service planning (Cornell LII copy)
+    url: https://www.law.cornell.edu/regulations/new-york/14-NYCRR-595.11
+    file: part595-11-service-planning.html
+    date: "2026-11-11"
+    version: "LII current"
+    sha256: 95dc7a63e3efb71ad43bcaae6619bf8c973f5f84c3cbf7475ed380d098dbd065
+    use: plan within 4 weeks of admission; progress notes at least monthly; plan review every 3 months
+  - id: part595-14
+    title: 14 NYCRR 595.14 Case records and reports (Cornell LII copy)
+    url: https://www.law.cornell.edu/regulations/new-york/14-NYCRR-595.14
+    file: part595-14-case-records.html
+    date: "2026-11-11"
+    version: "LII current"
+    sha256: 3492492643c3b9a0501f3c02ce5149575fab89ef17486c744a6ab044a362b528
+    use: case record contents; dated, signed entries; progress notes tied to goals
+  - id: part595-hcbs-guidance
+    title: 14 NYCRR Part 595 HCBS Subregulatory Guidance (Oct 7, 2022)
+    url: https://omh.ny.gov/omhweb/bho/docs/hcbs_subregulatory_guidance_for_595.pdf
+    file: hcbs-595-guidance.pdf
+    date: "2022-10-07"
+    version: "Oct 2022"
+    sha256: 9c924f5ab3ff4fab9cf5a8ffd7188806f0b24dd6c08caccd7996cfa6e961546b
+    use: HCBS setting standards for licensed Apartment Treatment (person-centered service plan)

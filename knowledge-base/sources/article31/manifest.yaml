@@ -1,0 +1,20 @@
+# Article 31 (OMH MHOTRS clinic) source documents. Approved by user 2026-11-11.
+# date = PDF modification date or the date printed in the document (verify against omh.ny.gov before relying on it).
+program: article31
+documents:
+  - id: a31-part599-regs
+    title: 14 NYCRR Part 599, Mental Health Outpatient Treatment and Rehabilitative Services (regulation text)
+    url: https://omh.ny.gov/omhweb/clinic_restructuring/part599/mhotrs-regulations.pdf
+    file: mhotrs-regulations.pdf
+    date: "2023-03-17"
+    version: "post-Nov 2022 revision"
+    sha256: 424cbafe5537712a6cb0a275c0b2a101d3ab19df98cc0b22d7952cf6e29c52eb
+    use: core rules; treatment plan and record requirements (599.10, 599.11)
+  - id: a31-programmatic-guidance
+    title: MHOTRS Programmatic Guidance (collaborative documentation, concurrent record keeping, progress notes)
+    url: https://omh.ny.gov/omhweb/clinic_restructuring/docs/mhotrs_programmatic_guidance.pdf
+    file: mhotrs-programmatic-guidance.pdf
+    date: "2025-05-21"
+    version: "May 2025"
+    sha256: 7791fe75da9fe8561793313045d289ec1bd54d587b7c2d1bf1a0223ea3736d15
+    use: most detailed documentation guidance; most recent

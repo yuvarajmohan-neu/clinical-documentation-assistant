@@ -1,0 +1,20 @@
+# Youth ACT (OMH Youth Assertive Community Treatment) source documents. Approved by user 2026-11-11.
+# date = PDF modification date (verify against omh.ny.gov before relying on it).
+program: act-youth
+documents:
+  - id: youth-act-guidance
+    title: OMH Youth ACT Program and Billing Guidance Document (February 2024)
+    url: https://omh.ny.gov/omhweb/guidance/youth-act-program-guidance.pdf
+    file: youth-act-program-guidance.pdf
+    date: "2024-02-06"
+    version: "February 2024"
+    sha256: 0972a1c89c103f27359eb2cca52c17bcddd987260829a95fe90a15e4a6cccafd
+    use: section 4.7 progress notes, 4.8 case records
+  - id: youth-act-soc
+    title: OMH Youth ACT Standards of Care
+    url: https://omh.ny.gov/omhweb/dqm/bic/youth-act-standards-of-care.pdf
+    file: youth-act-standards-of-care.pdf
+    date: "2024-07-03"
+    version: "2024"
+    sha256: 8dd33bc94be90d51465aff05c7a4c224ba2eab5bad91eb0edb0ec200b2008834
+    use: SOC 5.1 service plan (30 days), SOC 5.2 progress notes and 6-month plan reviews

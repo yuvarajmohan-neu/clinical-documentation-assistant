@@ -1,0 +1,20 @@
+# Adult ACT (OMH Assertive Community Treatment) source documents. Approved by user 2026-11-11.
+# date = PDF modification date (verify against omh.ny.gov before relying on it).
+program: act-adult
+documents:
+  - id: act-program-guidelines
+    title: OMH Adult and Young Adult ACT Program Guidelines (2025)
+    url: https://omh.ny.gov/omhweb/act/act-program-guidelines.pdf
+    file: act-program-guidelines.pdf
+    date: "2025-12-17"
+    version: "2025"
+    sha256: 7e84405bb18325a0d982b4e1d1c4cd1e49d25d38986326c67b5765fd9c0a362a
+    use: section 5.10.5 progress notes, 5.11 case records, service plan rules
+  - id: act-soc
+    title: OMH ACT Adult and Young Adult Standards of Care Survey Tool (May 2026)
+    url: https://omh.ny.gov/omhweb/act/act-soc.pdf
+    file: act-soc.pdf
+    date: "2026-05-22"
+    version: "May 2026"
+    sha256: d5e9a850b52d1ef3c2db36065ac1707a2b9c041421c3146ee7a0db3706d37e66
+    use: ACT SOC 4.11 (notes signed within 72 hours, plan reviewed every 6 months); audit scoring
