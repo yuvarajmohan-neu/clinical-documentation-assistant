@@ -47,9 +47,9 @@ need data/config changes, not new UI code.
 - Severity badges: icon **plus** colour, never colour alone (accessibility). Colours for
   Critical/Warning/Informational aren't finalized by the brand — `--jb-severity-*` tokens in
   `index.css` are a placeholder pending a team decision (walkthrough §4, §8.6).
-- Missing asset: the Radiant logo file isn't in `.claude/skills/jewish-board-brand/assets/` yet.
-  The header currently renders "The Jewish Board" as text — swap in the real logo image when it
-  arrives, don't fake one.
+- Logo: `src/components/Logo.tsx` loads the official file from `public/brand/` (see
+  `public/brand/README.md` for file names) and falls back to "The Jewish Board" as text when it's
+  missing. Use `<Logo>` everywhere — never redraw, recolor, stretch or crop the logo.
 
 ## Guardrails (frontend must not violate these)
 - **Never fill a gap.** Only render what the backend returns. `[NOT PROVIDED]` blanks stay

@@ -10,11 +10,13 @@ import type { AuthContextValue, AuthState, Principal } from "./types";
  * testable without a running Keycloak instance. The signed-in callback
  * handler and real OIDC redirect are P1's build.
  */
+// Mirrors backend/app/mock_data.py DEV_PRINCIPAL. Two program roles so the demo shows the
+// program picker; a single-program user would skip it.
 const DEV_PRINCIPAL: Principal = {
-  userId: "art31.clinician",
+  userId: "demo.clinician",
   name: "Demo Clinician",
   roles: ["clinician"],
-  programs: ["article31"],
+  programs: ["article31", "health_home"],
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);

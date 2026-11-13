@@ -1,8 +1,11 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth";
 import { App } from "../App";
+import { mockFetch, programsFixture, sessionFixture } from "../test/fixtures";
+
+afterEach(() => vi.unstubAllGlobals());
 
 describe("SignInScreen", () => {
   it("shows Jewish Board branding and a sign-in button when signed out", () => {
@@ -12,12 +15,13 @@ describe("SignInScreen", () => {
       </AuthProvider>,
     );
 
-    expect(screen.getByRole("heading", { name: "The Jewish Board" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "The Jewish Board" })).toBeInTheDocument();
     expect(screen.getByText("Care for all New Yorkers")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
   });
 
-  it("signs the demo clinician in after clicking Sign in", async () => {
+  it("signs the demo clinician in and lands on Session setup", async () => {
+    mockFetch((url) => ({ body: url.endsWith("/programs") ? programsFixture : [sessionFixture] }));
     const user = userEvent.setup();
     render(
       <AuthProvider>
@@ -27,9 +31,11 @@ describe("SignInScreen", () => {
 
     await user.click(screen.getByRole("button", { name: "Sign in" }));
 
-    await waitFor(() => {
-      expect(screen.getByText(/Signed in as Demo Clinician/)).toBeInTheDocument();
-    });
-    expect(screen.getByText(/article31/)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Set up your session" })).toBeInTheDocument();
+    expect(screen.getByText("Demo Clinician")).toBeInTheDocument();
+    // Two program roles → the picker shows, with programs outside the role locked.
+    expect(await screen.findByRole("radio", { name: /Article 31 Outpatient Clinic/ })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: /Adult ACT/ })).toBeDisabled();
+    expect(await screen.findByText("Jamie Rivera (synthetic)")).toBeInTheDocument();
   });
 });

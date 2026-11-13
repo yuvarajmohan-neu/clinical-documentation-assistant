@@ -6,6 +6,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    // Demo API (backend/app/main.py) on :8000 — same-origin calls, no CORS setup needed.
+    proxy: {
+      "/api": "http://localhost:8000",
+    },
   },
   test: {
     environment: "jsdom",
