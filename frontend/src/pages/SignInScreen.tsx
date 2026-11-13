@@ -6,7 +6,7 @@ import { useAuth } from "../auth";
  * hosted login page; here it calls the dev auth stub.
  */
 export function SignInScreen() {
-  const { status, signIn } = useAuth();
+  const { status, error, signIn } = useAuth();
   const isAuthenticating = status === "authenticating";
 
   return (
@@ -20,6 +20,7 @@ export function SignInScreen() {
           notes and treatment plan updates, and checks them against each
           program&rsquo;s NY State documentation requirements.
         </p>
+        {error && <p role="alert">{error}</p>}
         <button
           type="button"
           className="jb-btn-primary"

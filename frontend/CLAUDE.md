@@ -30,10 +30,9 @@ need data/config changes, not new UI code.
 - Everything OIDC-shaped is isolated in this one folder so the adapter swap stays contained:
   `react-oidc-context`/Keycloak now, MSAL/Entra ID later (JB Azure standard). Never import an auth
   SDK from outside `src/auth/`.
-- The current `AuthContext.tsx` is a **dev-mode stub only** (mirrors `AUTH_PROVIDER=dev` on the
-  backend). Replacing it with real `react-oidc-context` + PKCE is still open work — do it inside
-  this file and `types.ts`'s `Principal` shape, not by changing how the rest of the app consumes
-  `useAuth()`.
+- `AuthContext.tsx` supports Keycloak OIDC using authorization code + PKCE, with a dev-mode
+  fallback selected by `VITE_AUTH_PROVIDER=dev`. Keep the `Principal` shape and `useAuth()`
+  contract stable when changing the provider.
 - A user with exactly one `program:*` role skips the program picker — the picker only renders when
   `principal.programs.length > 1`.
 - Bearer token attaches to every API call from here; nothing else should set auth headers.
@@ -65,7 +64,7 @@ need data/config changes, not new UI code.
 - **Time:** always 12-hour Eastern, e.g. `11/6/2026 2:05 PM ET`. Format with `Intl`/
   `America/New_York`, or consume an already-formatted field from the API — don't do arithmetic on
   raw timestamps in components.
-- **No secrets.** Only public OIDC client config (`cda-web`) belongs in `.env`/`VITE_*` vars.
+- **No secrets.** Only public OIDC client config (`clinician_app`) belongs in `.env`/`VITE_*` vars.
 - Web Speech API (dictation) only works in Chrome/Edge and sends audio to Google — acceptable only
   because all demo data is synthetic. Don't use it as a reason to relax that rule elsewhere.
 

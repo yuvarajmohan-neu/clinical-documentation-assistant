@@ -7,7 +7,7 @@ import { SignInScreen } from "./pages/SignInScreen";
  * §2) are P1's build on top of this.
  */
 export function App() {
-  const { status, principal, signOut } = useAuth();
+  const { status, principal, error, signOut } = useAuth();
 
   return (
     <>
@@ -24,6 +24,7 @@ export function App() {
         <main className="jb-main">
           <div className="jb-card">
             <h2>Signed in as {principal.name}</h2>
+            {error && <p role="alert">{error}</p>}
             <p>
               Programs: {principal.programs.join(", ")} — program selector
               and session picker land here next.

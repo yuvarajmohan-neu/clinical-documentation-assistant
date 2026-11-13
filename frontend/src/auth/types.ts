@@ -15,6 +15,7 @@ export type AuthStatus = "signed-out" | "authenticating" | "signed-in";
 export interface AuthState {
   status: AuthStatus;
   principal: Principal | null;
+  error: string | null;
 }
 
 export interface AuthContextValue extends AuthState {

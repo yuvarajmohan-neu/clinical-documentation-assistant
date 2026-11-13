@@ -177,9 +177,26 @@ cp .env.example .env.local
 
 ```bash
 # From root directory
-docker-compose -f infra/docker-compose.yml up -d
-# Starts: Postgres (port 5432), Keycloak (port 8080)
+docker compose -f infra/docker-compose.yml up -d
+# Starts Postgres (port 5432) and Keycloak (port 8080)
 ```
+
+Keycloak imports the synthetic `jb-demo` realm from
+[`infra/keycloak/realm-jb-demo.json`](./infra/keycloak/realm-jb-demo.json) on first startup.
+Open the admin console at <http://localhost:8080/admin/> and sign in with
+`admin` / `admin-dev-password` (the local-only credentials configured in
+[`infra/docker-compose.yml`](./infra/docker-compose.yml)). Demo realm users all use
+`demo-pass-not-real`:
+
+| Username | Role / program access |
+|---|---|
+| `art31.clinician` | Clinician, Article 31 |
+| `act.clinician` | Clinician, Adult ACT and Youth ACT |
+| `supervisor` | Supervisor, all five programs |
+
+Use the `jb-demo` realm for these accounts. To stop the local services, run
+`docker compose -f infra/docker-compose.yml down`; add `-v` only when you intend
+to delete the local database and Keycloak data.
 
 ### 4. Initialize Database
 
@@ -211,7 +228,11 @@ npm run dev
 - **Frontend:** http://localhost:5173
 - **Backend API:** http://localhost:8000
 - **API Docs:** http://localhost:8000/docs
-- **Keycloak Admin:** http://localhost:8080 (admin/admin)
+- **Keycloak Admin:** http://localhost:8080/admin/ (admin / admin-dev-password)
+
+The current frontend authentication screen is still a development stub; the
+local Keycloak realm and backend OIDC provider are configured, but the frontend
+does not yet perform the Keycloak redirect/login flow.
 
 ---
 

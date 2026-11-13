@@ -1,10 +1,18 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthProvider } from "../auth";
 import { App } from "../App";
 
 describe("SignInScreen", () => {
+  beforeEach(() => {
+    vi.stubEnv("VITE_AUTH_PROVIDER", "dev");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("shows Jewish Board branding and a sign-in button when signed out", () => {
     render(
       <AuthProvider>
@@ -12,7 +20,7 @@ describe("SignInScreen", () => {
       </AuthProvider>,
     );
 
-    expect(screen.getByRole("heading", { name: "The Jewish Board" })).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { name: "The Jewish Board" })).toHaveLength(2);
     expect(screen.getByText("Care for all New Yorkers")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
   });
